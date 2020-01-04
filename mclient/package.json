@@ -1,0 +1,42 @@
+{
+    "name": "harmovis-layers",
+    "version": "1.4.1",
+    "description": "Harmoware-VIS Layers Synerex provider",
+    "main": "index.js",
+    "scripts": {
+        "start": "webpack-dev-server --port 10080 --mode development",
+        "dev": "webpack --mode development",
+        "watch": "webpack --watch",
+          "build": "webpack --mode production"
+    },
+    "keywords": [
+      "Harmoware",
+      "Synerex"
+    ],
+    "author": "Nobuo Kawaguchi",
+    "license": "Apache-2.0",
+    "dependencies": {
+      "@babel/core": "^7.6.4",
+      "@babel/preset-react": "^7.6.3",
+      "babel-loader": "^8.0.6",
+      "bootstrap": "^4.4.1",
+      "css-loader": "^3.2.0",
+      "hard-source-webpack-plugin": "^0.13.1",
+      "harmoware-vis": "1.4.1",
+      "@deck.gl/react": "7.3.12",
+      "node-sass": "^4.12.0",
+      "react": "^16.12.0",
+      "react-dom": "^16.12.0",
+      "react-redux": "^7.1.3",
+      "redux": "^4.0.4",
+      "sass-loader": "^8.0.0",
+      "style-loader": "^1.0.0",
+      "socket.io": "^2.3.0",
+      "socket.io-client": "^2.3.0",
+      "webpack": "^4.41.2",
+      "webpack-cli": "^3.3.9",
+      "webpack-dev-server": "^3.9.0"
+    }
+  }
+
+  
