@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/mtfelian/golang-socketio"
 	"github.com/mtfelian/golang-socketio/transport"
 	fleet "github.com/synerex/proto_fleet"
+	geo "github.com/synerex/proto_geography"
+	pagent "github.com/synerex/proto_people_agent"
 	api "github.com/synerex/synerex_api"
 	pbase "github.com/synerex/synerex_proto"
 	sxutil "github.com/synerex/synerex_sxutil"
@@ -26,7 +29,7 @@ var (
 	nodesrv    = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
 	port       = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
 	mu         sync.Mutex
-	version    = "0.01"
+	version    = "0.02"
 	assetsDir  http.FileSystem
 	ioserv     *gosocketio.Server
 	sxServerAddress string
@@ -197,6 +200,94 @@ func subscribeRideSupply(client *sxutil.SXServiceClient) {
 	}
 }
 
+
+
+
+func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
+	switch(sp.SupplyName){
+	case "GeoJson":
+			geo := &geo.Geo{}
+			err := proto.Unmarshal(sp.Cdata.Entity, geo)
+			if err == nil {
+				strjs := string(geo.Data)
+				log.Printf("Obtaining %s, id:%d, %s, len:%d ", geo.Type, geo.Id, geo.Label,len(strjs))
+				log.Printf("Data '%s'", strjs)
+				mu.Lock()
+				ioserv.BroadcastToAll("geojson", strjs)
+				mu.Unlock()
+			}
+	case "Lines":
+		geo := &geo.Lines{}
+		err := proto.Unmarshal(sp.Cdata.Entity, geo)
+		if err == nil {
+
+			jsonBytes, _ := json.Marshal(geo.Lines)
+			log.Printf("Lines: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("lines", string(jsonBytes))
+			mu.Unlock()
+		}
+	}
+
+}
+
+
+func subscribeGeoSupply(client *sxutil.SXServiceClient) {
+	for {
+		ctx := context.Background() //
+		err := client.SubscribeSupply(ctx, supplyGeoCallback)
+		log.Printf("Error:Supply %s\n", err.Error())
+		// we need to restart
+
+		time.Sleep(5*time.Second) // wait 5 seconds to reconnect
+		newClt := sxutil.GrpcConnectServer(sxServerAddress)
+		if newClt != nil {
+			log.Printf("Reconnect server [%s]\n", sxServerAddress)
+			client.Client = newClt
+		}
+	}
+}
+
+
+
+func supplyPAgentCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
+	switch(sp.SupplyName){
+	case "Agents":
+			agents := &pagent.PAgents{}
+			err := proto.Unmarshal(sp.Cdata.Entity, agents)
+			if err == nil {
+				jsonBytes, _ := json.Marshal(agents)
+				jstr := string(jsonBytes)
+//				log.Printf("Lines: %v", jstr)
+				mu.Lock()
+				ioserv.BroadcastToAll("agents", jstr)
+				mu.Unlock()
+			}
+	}
+
+}
+
+
+
+func subscribePAgentSupply(client *sxutil.SXServiceClient) {
+	for {
+		ctx := context.Background() //
+		err := client.SubscribeSupply(ctx, supplyPAgentCallback)
+		log.Printf("Error:Supply %s\n", err.Error())
+		// we need to restart
+
+		time.Sleep(5*time.Second) // wait 5 seconds to reconnect
+		newClt := sxutil.GrpcConnectServer(sxServerAddress)
+		if newClt != nil {
+			log.Printf("Reconnect server [%s]\n", sxServerAddress)
+			client.Client = newClt
+		}
+	}
+}
+
+
+
 /*
 func supplyPTCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 //	pt := sp.GetArg_PTService()
@@ -232,7 +323,7 @@ func monitorStatus(){
 func main() {
 	flag.Parse()
 
-	channelTypes := []uint32{pbase.RIDE_SHARE, pbase.PEOPLE_AGENT_SVC}
+	channelTypes := []uint32{pbase.RIDE_SHARE, pbase.PEOPLE_AGENT_SVC, pbase.GEOGRAPHIC_SVC}
 	sxServerAddress , rerr := sxutil.RegisterNode(*nodesrv, "HarmoVisLayers", channelTypes, nil)
 	if rerr != nil {
 		log.Fatal("Can't register node ", rerr)
@@ -252,16 +343,21 @@ func main() {
 
 	client := sxutil.GrpcConnectServer(sxServerAddress) // if there is server address change, we should do it!
 
-	argJson := fmt.Sprintf("{Client:Map:RIDE")
-	rideClient := sxutil.NewSXServiceClient(client, pbase.RIDE_SHARE, argJson)
+	argJSON := fmt.Sprintf("{Client:Map:RIDE")
+	rideClient := sxutil.NewSXServiceClient(client, pbase.RIDE_SHARE, argJSON)
 
-//	argJson2 := fmt.Sprintf("{Client:Map:PAGENT}")
-//	pa_client := sxutil.NewSXServiceClient(client, pbase.PEOPLE_AGENT_SVC, argJson2)
+	argJSON2 := fmt.Sprintf("{Client:Map:PAGENT}")
+	pa_client := sxutil.NewSXServiceClient(client, pbase.PEOPLE_AGENT_SVC, argJSON2)
+
+	argJSON3 := fmt.Sprintf("{Client:Map:Geo}")
+	geo_client := sxutil.NewSXServiceClient(client, pbase.GEOGRAPHIC_SVC, argJSON3)
 
 	wg.Add(1)
 	go subscribeRideSupply(rideClient)
 
-//	go subscribePTSupply(pa_client)
+	go subscribePAgentSupply(pa_client)
+
+	go subscribeGeoSupply(geo_client)
 
 	go monitorStatus() // keep status
 

@@ -39,6 +39,16 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/synerex/proto_fleet v0.0.1 h1:VDKykx2ZVNfugeCgbLEY03++ppH3sUKkHDxvTJt3s1I=
 github.com/synerex/proto_fleet v0.0.1/go.mod h1:6lJTskwTm6qgdtOADGI1bZRv6Ng0oW0smmunlFKznmo=
+github.com/synerex/proto_geographic v0.0.1 h1:z2VJm2rENQTSGBG/Tz2Fkc3XM/HQi8L7uZKHoKk3HnM=
+github.com/synerex/proto_geographic v0.0.1/go.mod h1:nqDNv3v/7AJ58NJ1rUkbB/zd1uV0vppa8wyYJhKDR/w=
+github.com/synerex/proto_geographic v0.0.2 h1:t6K428txYquOfbWCfq+HUQYYaVWcm5J7b8pV3prbDWU=
+github.com/synerex/proto_geographic v0.0.2/go.mod h1:nqDNv3v/7AJ58NJ1rUkbB/zd1uV0vppa8wyYJhKDR/w=
+github.com/synerex/proto_geography v0.0.5 h1:jeKkywzLpXbz3xzQg99ZuKNa7I2ky8eA1gMWXKTZsF8=
+github.com/synerex/proto_geography v0.0.5/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_geography v0.0.6 h1:vaTNZnetaS4PRvVRDA568nR4WXK9O/zJGgm79GNd4bI=
+github.com/synerex/proto_geography v0.0.6/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
+github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=
 github.com/synerex/synerex_api v0.2.1/go.mod h1:sVqiujIdRBLEtKGw4pKjNK3SPgK0ymTlLWL8Drf266A=
 github.com/synerex/synerex_nodeapi v0.4.6 h1:a0sQuToEitSBzHDvuAB/qkRHzzrBJCCCgbxGEJ9hvco=
@@ -46,6 +56,8 @@ github.com/synerex/synerex_nodeapi v0.4.6/go.mod h1:sYy5L5wF9nqUwH+TFHPg0zL8NVF8
 github.com/synerex/synerex_proto v0.1.3/go.mod h1:e+j/Zb2HXEOSUF6EnDnoGxxreREw5COCz2MQoKiGJyk=
 github.com/synerex/synerex_proto v0.1.5 h1:goV9i4gyfnnhRImxvyy33jfBsBW5uuQrUCIVLbyKyRo=
 github.com/synerex/synerex_proto v0.1.5/go.mod h1:e+j/Zb2HXEOSUF6EnDnoGxxreREw5COCz2MQoKiGJyk=
+github.com/synerex/synerex_proto v0.1.6 h1:KKY5RCfbimCAx9xtU//nlxXJHiQyZxEXaA+1b0FYsLI=
+github.com/synerex/synerex_proto v0.1.6/go.mod h1:e+j/Zb2HXEOSUF6EnDnoGxxreREw5COCz2MQoKiGJyk=
 github.com/synerex/synerex_sxutil v0.3.13 h1:h3WD4xL1G2XBdJAdtkF2/Xui0KF3+JSA9x8HVhblGi0=
 github.com/synerex/synerex_sxutil v0.3.13/go.mod h1:VaWnWzFydO8jXHz+MG5wsJLB2qujBpR6Ul+Ar9nwY6c=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
