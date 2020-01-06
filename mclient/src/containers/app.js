@@ -3,10 +3,14 @@ import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput, LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, MovesBase, BasedProps
 } from 'harmoware-vis';
 
+
+
 //import { StaticMap,  } from 'react-map-gl';
 import { Layer } from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
-import {_MapContext as MapContext, StaticMap, NavigationControl} from 'react-map-gl';
+import {GeoJsonLayer, LineLayer} from '@deck.gl/layers';
+
+import {_MapContext as MapContext, InteractiveMap, NavigationControl} from 'react-map-gl';
 
 
 import Controller from '../components/controller';
@@ -30,20 +34,100 @@ class App extends Container {
 			heatmapVisible: false,
 			optionChange: false,
 			mapbox_token: "",
+			geojson: null,
+			lines:[],
+			linecolor: [0,255,255],
 			popup: [0, 0, '']
 		};
 
 		// for receiving event info.
 		socket.on('connect', () => { console.log("Socket.IO connected!") });
 		socket.on('event', this.getEvent.bind(this));
+		socket.on('geojson', this.getGeoJson.bind(this));
+		socket.on('lines', this.getLines.bind(this));
+		socket.on('agents', this.getAgents.bind(this));
 
 		socket.on('mapbox_token', (token) => {
 			console.log("Token Got:" + token)
 			this.setState({ mapbox_token: token })
 		});
 
+
 		socket.on('disconnect', () => { console.log("Socket.IO disconnected!") });
 	}
+	
+	bin2String(array) {
+		return String.fromCharCode.apply(String, array);
+  	} 
+
+	getGeoJson(data){
+		console.log("Geojson:" + data.length)
+		console.log(data)
+		this.setState({ geojson: JSON.parse(data) })
+	}
+
+	getLines(data){
+		console.log("getLines!:" + data.length)
+//		console.log(data)
+		if ( this.state.lines.length > 0 ){
+			const ladd = JSON.parse(data)
+			const lbase = this.state.lines
+			const lists = lbase.concat(ladd)
+			this.setState({ lines: lists })
+		}else{
+			this.setState({ lines: JSON.parse(data) })
+		}
+	}
+
+	
+	getAgents(data){
+		const { actions, movesbase } = this.props
+		const agents = JSON.parse(data).agents;
+//		console.log(data)
+//		console.log(agents)
+	
+		const time = Date.now() / 1000; // set time as now. (If data have time, ..)
+//		let hit = false;
+//		const movesbasedata = [...movesbase]; // why copy !?
+		let  setMovesbase = [];
+
+		if (movesbase.length == 0){			
+//			console.log("Initial!:" + agents.length)
+			for(let i = 0, len = agents.length; i < len; i++){ 
+				setMovesbase.push({
+					mtype:0,
+					id: i,
+					departuretime: time,
+					arrivaltime: time,
+					operation: [{
+						elapsedtime: time,
+						position: [agents[i].point[0], agents[i].point[1], 0],
+						angle:0,
+						speed: 1
+					}]
+				});
+			}
+// we may refresh viewport
+
+		}else {
+//			console.log("Aget Update!" + data.length+":"+ agents[0])
+			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
+				movesbase[i].arrivaltime = time;
+				movesbase[i].operation.push({
+					elapsedtime: time,
+					position: [agents[i].point[0], agents[i].point[1], 0],
+					angle:0,
+					speed: 1
+				});
+//				setMovesbase.push(movesbase[i]);
+			}
+			setMovesbase=movesbase;
+		}
+
+		actions.updateMovesBase(setMovesbase);
+	}
+
+
 
 	getEvent(socketData) {
 		const { actions, movesbase } = this.props
@@ -92,6 +176,8 @@ class App extends Container {
 		const setMovesbase = [];
 		let dataModify = false;
 		const compareTime = settime - maxKeepSecond;
+
+		/*
 		for (let i = 0, lengthi = movesbasedata.length; i < lengthi; i += 1) {
 			const { departuretime: propsdeparturetime, operation: propsoperation } = movesbasedata[i];
 			let departuretime = propsdeparturetime;
@@ -114,8 +200,7 @@ class App extends Container {
 				} else {
 					dataModify = true;
 				}
-		}
-		if (dataModify) {
+		}*/
 			if (!animatePause) {
 				actions.setAnimatePause(true);
 			}
@@ -123,7 +208,8 @@ class App extends Container {
 			if (!animatePause) {
 				actions.setAnimatePause(false);
 			}
-		}
+		console.log(this.props.viewport)
+		console.log(MapContext.viewport)
 	}
 
 	getMoveDataChecked(e) {
@@ -173,39 +259,87 @@ class App extends Container {
 				this.setState({ popup: [0, 0, ''] });
 			}
 		};
+		var layers = []
 
-		const layers = 	[
-			this.state.moveDataVisible && movedData.length > 0 ?
+		if (this.state.geojson != null) {
+			layers.push(
+			new GeoJsonLayer({
+				id: 'geojson-layer',
+				data: this.state.geojson,
+				pickable: true,
+				stroked: false,
+				filled: true,
+				extruded: true,
+				lineWidthScale: 2,
+				lineWidthMinPixels: 2,
+				getFillColor: [160, 160, 180, 200],
+//				getLineColor: d => colorToRGBArray(d.properties.color),
+				getLineColor: [255,255,255],
+				getRadius: 1,
+				getLineWidth: 1,
+				getElevation: 30,
+//				onHover: ({object, x, y}) => {
+//				  const tooltip = object.properties.name || object.properties.station;
+//				}
+			}));
+		}
+
+
+		if(	this.state.lines.length > 0 ){
+			this.lines = 0;
+			layers.push(
+				new LineLayer({
+					visible:true,
+					data: this.state.lines,
+					getSourcePosition: d => d.from,
+					getTargetPosition: d => d.to,
+					getColor: this.state.linecolor,
+					getWidth: 1,
+					widthMinPixels: 0.1,
+				}) 
+			);
+
+		}
+
+
+
+		if(	this.state.moveDataVisible && movedData.length > 0 ){
+			layers.push(
 				new MovesLayer({
 					viewport, routePaths, movesbase, movedData,
 					clickedObject, actions, lightSettings,
 					visible: this.state.moveDataVisible,
 					optionVisible: this.state.moveOptionVisible,
-					optionChange: this.state.optionChange,
+					layerRadiusScale: 0.01,
+					getRaduis: x => 0.02,
+					optionCellSize: 2,
+					iconChange: false, 
+					optionChange: false, // this.state.optionChange,
 					onHover
-				}) : null
-		];
+				}) 
+			);
+		}
 
-		const onViewportChange = this.props.onViewportChange || actions.setViewport || this.logViewPort;
+		const onViewportChange = this.props.onViewportChange || actions.setViewport;
 //		viewState={viewport} 
 					
 		// wait until mapbox_token is given from harmo-vis provider.
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<DeckGL 
-					layers={layers} 
+					layers={layers}
 					onWebGLInitialized={this.initialize} 
-					initialViewState={{longitude: viewport.longitude, latitude: viewport.latitude, zoom: viewport.zoom}}
+					initialViewState={{longitude:136.802728 , latitude: 34.888, zoom: 16}}
 					controller={true}
 					ContextProvider={MapContext.Provider}
 				>
-					<StaticMap
+					<InteractiveMap
 					viewport={viewport} 
 					mapStyle={'mapbox://styles/mapbox/dark-v8'}
 					onViewportChange={onViewportChange}
 					mapboxApiAccessToken={this.state.mapbox_token}
 					visible={true}>
-					</StaticMap>
+					</InteractiveMap>
 				</DeckGL>
 				: <LoadingIcon loading={true} />;
 

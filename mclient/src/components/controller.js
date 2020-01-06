@@ -115,14 +115,6 @@ export default class Controller extends React.Component {
         <div className="container">
           <ul className="list-group">
             <li>
-              <div className="harmovis_input_button_column">
-                <label htmlFor="DepotsInput" className="btn btn-outline-light btn-sm w-100">
-                  停留所データ選択<DepotsInput actions={actions} id="DepotsInput" />
-                </label>
-                <div>{depotsFileName || '選択されていません'}</div>
-              </div>
-            </li>
-            <li>
               <div className="form-check">
                 <input type="checkbox" id="MoveDataChecked" onChange={getMoveDataChecked} className="form-check-input" defaultChecked={true} />
                 <label htmlFor="MoveDataChecked" className="form-check-label">運行データ表示</label>
@@ -184,10 +176,10 @@ export default class Controller extends React.Component {
               <label htmlFor="SpeedRange">スピード<SpeedValue secperhour={secperhour} actions={actions} />秒/時</label>
               <SpeedRange secperhour={secperhour} actions={actions} id="SpeedRange" className="form-control-range" />
             </li>
-            <li><div>移動データ操作</div>
+            <li><div>移動データ操作0</div>
               <div className="btn-group d-flex" role="group">
-                <button onClick={this.deleteMovebase.bind(this,60)} className="btn btn-outline-light btn-sm w-100">
-                  <span className="button_span"><Icon icon={icDelete} />&nbsp;1分以上前の移動データ削除</span>
+                <button onClick={this.deleteMovebase.bind(this,0)} className="btn btn-outline-light btn-sm w-100">
+                  <span className="button_span"><Icon icon={icDelete} />&nbsp; 全移動データ削除</span>
                 </button>
               </div>
             </li>
