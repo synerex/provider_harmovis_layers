@@ -277,7 +277,7 @@ class App extends Container {
 				getLineColor: [255,255,255],
 				getRadius: 1,
 				getLineWidth: 1,
-				getElevation: 30,
+				getElevation: 10,
 //				onHover: ({object, x, y}) => {
 //				  const tooltip = object.properties.name || object.properties.station;
 //				}
@@ -312,7 +312,9 @@ class App extends Container {
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.01,
 					getRaduis: x => 0.02,
+					getStrokeWidth: 0.01,
 					optionCellSize: 2,
+					sizeScale: 1,
 					iconChange: false, 
 					optionChange: false, // this.state.optionChange,
 					onHover
@@ -329,7 +331,7 @@ class App extends Container {
 				<DeckGL 
 					layers={layers}
 					onWebGLInitialized={this.initialize} 
-					initialViewState={{longitude:136.802728 , latitude: 34.888, zoom: 16}}
+					initialViewState={{longitude:136.8163486 , latitude: 34.8592285, zoom: 17}}
 					controller={true}
 					ContextProvider={MapContext.Provider}
 				>
