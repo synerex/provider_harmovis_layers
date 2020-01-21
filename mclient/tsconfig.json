@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],
+      "allowJs": true,
+//      "checkJs": true,
+      "declaration": false,
+      "skipLibCheck": false,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "sourceMap": false,
+      "forceConsistentCasingInFileNames": true,
+      "module": "esnext",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noEmit": false,
+      "jsx": "react",
+      "typeRoots" : ["src/@types" ,"./node_modules/@types"],
+//      "types": ["mapbox-gl"],
+    },
+    "include": [
+      "src"
+    ]
+}
+  

@@ -132,8 +132,11 @@ func run_server() *gosocketio.Server {
 	server := gosocketio.NewServer()
 
 	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
+		// wait for a few milli seconds.		
 		log.Printf("Connected from %s as %s", c.IP(), c.Id())
 		// sending mapbox token from provider to browser.
+		time.Sleep(500*time.Millisecond)
+
 		mapboxToken := os.Getenv("MAPBOX_ACCESS_TOKEN")
 		c.Emit("mapbox_token", mapboxToken)
 		log.Printf("mapbox-token transferred %s ", mapboxToken)
@@ -228,6 +231,18 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			ioserv.BroadcastToAll("lines", string(jsonBytes))
 			mu.Unlock()
 		}
+	case "ViewState":
+		vs := &geo.ViewState{}
+		err := proto.Unmarshal(sp.Cdata.Entity, vs)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(vs)
+			log.Printf("ViewState: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
+			mu.Unlock()
+		}
+
 	}
 
 }
@@ -257,8 +272,10 @@ func supplyPAgentCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			agents := &pagent.PAgents{}
 			err := proto.Unmarshal(sp.Cdata.Entity, agents)
 			if err == nil {
+				seconds := sp.Ts.GetSeconds()
+				nanos := sp.Ts.GetNanos()
 				jsonBytes, _ := json.Marshal(agents)
-				jstr := string(jsonBytes)
+				jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}",seconds, int(nanos/1000000), string(jsonBytes));
 //				log.Printf("Lines: %v", jstr)
 				mu.Lock()
 				ioserv.BroadcastToAll("agents", jstr)
@@ -324,7 +341,8 @@ func main() {
 	flag.Parse()
 
 	channelTypes := []uint32{pbase.RIDE_SHARE, pbase.PEOPLE_AGENT_SVC, pbase.GEOGRAPHIC_SVC}
-	sxServerAddress , rerr := sxutil.RegisterNode(*nodesrv, "HarmoVisLayers", channelTypes, nil)
+	var rerr error
+	sxServerAddress , rerr = sxutil.RegisterNode(*nodesrv, "HarmoVisLayers", channelTypes, nil)
 	if rerr != nil {
 		log.Fatal("Can't register node ", rerr)
 	}

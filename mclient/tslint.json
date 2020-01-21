@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "tslint-config-standard",
+    "tslint-react"
+  ],
+    "rules": {
+        "jsx-wrap-multiline": false
+    }
+}
