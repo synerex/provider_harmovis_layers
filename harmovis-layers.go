@@ -27,8 +27,9 @@ import (
 
 var (
 	nodesrv    = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
+	mapbox    = flag.String("mapbox", "", "Set Mapbox access token")
 	port       = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
-	mu         sync.Mutex
+	mu         = new(sync.Mutex)
 	version    = "0.02"
 	assetsDir  http.FileSystem
 	ioserv     *gosocketio.Server
@@ -135,9 +136,13 @@ func run_server() *gosocketio.Server {
 		// wait for a few milli seconds.		
 		log.Printf("Connected from %s as %s", c.IP(), c.Id())
 		// sending mapbox token from provider to browser.
-		time.Sleep(500*time.Millisecond)
+		time.Sleep(1000*time.Millisecond)
 
 		mapboxToken := os.Getenv("MAPBOX_ACCESS_TOKEN")
+		if *mapbox != ""  {
+			mapboxToken = *mapbox
+		}
+
 		c.Emit("mapbox_token", mapboxToken)
 		log.Printf("mapbox-token transferred %s ", mapboxToken)
 
@@ -187,19 +192,34 @@ func supplyRideCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 	}
 }
 
+func reconnectClient(client *sxutil.SXServiceClient){
+	mu.Lock() // first make client into nil 
+	if client.Client != nil {
+		client.Client = nil
+		log.Printf("Client reset \n")
+	}
+	mu.Unlock()
+	time.Sleep(5*time.Second) // wait 5 seconds to reconnect
+	mu.Lock() 
+	if client.Client == nil {
+		newClt := sxutil.GrpcConnectServer(sxServerAddress)
+		if newClt != nil {
+			log.Printf("Reconnect server [%s]\n", sxServerAddress)
+			client.Client = newClt
+		}	
+	} else { // someone may connect!
+		log.Printf("Use reconnected server\n", sxServerAddress)
+	}
+	mu.Unlock()
+}
+
 func subscribeRideSupply(client *sxutil.SXServiceClient) {
 	for {
 		ctx := context.Background() //
 		err := client.SubscribeSupply(ctx, supplyRideCallback)
 		log.Printf("Error:Supply %s\n", err.Error())
 		// we need to restart
-
-		time.Sleep(5*time.Second) // wait 5 seconds to reconnect
-		newClt := sxutil.GrpcConnectServer(sxServerAddress)
-		if newClt != nil {
-			log.Printf("Reconnect server [%s]\n", sxServerAddress)
-			client.Client = newClt
-		}
+		reconnectClient(client)
 	}
 }
 
@@ -225,7 +245,7 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 		if err == nil {
 
 			jsonBytes, _ := json.Marshal(geo.Lines)
-			log.Printf("Lines: %v", string(jsonBytes))
+//			log.Printf("Lines: %v", string(jsonBytes))
 
 			mu.Lock()
 			ioserv.BroadcastToAll("lines", string(jsonBytes))
@@ -254,13 +274,8 @@ func subscribeGeoSupply(client *sxutil.SXServiceClient) {
 		err := client.SubscribeSupply(ctx, supplyGeoCallback)
 		log.Printf("Error:Supply %s\n", err.Error())
 		// we need to restart
+		reconnectClient(client)
 
-		time.Sleep(5*time.Second) // wait 5 seconds to reconnect
-		newClt := sxutil.GrpcConnectServer(sxServerAddress)
-		if newClt != nil {
-			log.Printf("Reconnect server [%s]\n", sxServerAddress)
-			client.Client = newClt
-		}
 	}
 }
 
@@ -293,13 +308,7 @@ func subscribePAgentSupply(client *sxutil.SXServiceClient) {
 		err := client.SubscribeSupply(ctx, supplyPAgentCallback)
 		log.Printf("Error:Supply %s\n", err.Error())
 		// we need to restart
-
-		time.Sleep(5*time.Second) // wait 5 seconds to reconnect
-		newClt := sxutil.GrpcConnectServer(sxServerAddress)
-		if newClt != nil {
-			log.Printf("Reconnect server [%s]\n", sxServerAddress)
-			client.Client = newClt
-		}
+		reconnectClient(client)
 	}
 }
 
