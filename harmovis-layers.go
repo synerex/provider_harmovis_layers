@@ -5,15 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/mtfelian/golang-socketio"
-	"github.com/mtfelian/golang-socketio/transport"
-	fleet "github.com/synerex/proto_fleet"
-	geo "github.com/synerex/proto_geography"
-	pagent "github.com/synerex/proto_people_agent"
-	api "github.com/synerex/synerex_api"
-	pbase "github.com/synerex/synerex_proto"
-	sxutil "github.com/synerex/synerex_sxutil"
 	"log"
 	"net/http"
 	"os"
@@ -21,65 +12,73 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	gosocketio "github.com/mtfelian/golang-socketio"
+	"github.com/mtfelian/golang-socketio/transport"
+	fleet "github.com/synerex/proto_fleet"
+	geo "github.com/synerex/proto_geography"
+	pagent "github.com/synerex/proto_people_agent"
+	api "github.com/synerex/synerex_api"
+	pbase "github.com/synerex/synerex_proto"
+	sxutil "github.com/synerex/synerex_sxutil"
 )
 
 // Harmoware Vis-Synerex wiht Layer extension provider provides map information to Web Service through socket.io.
 
 var (
-	nodesrv    = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
-	mapbox    = flag.String("mapbox", "", "Set Mapbox access token")
-	port       = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
-	mu         = new(sync.Mutex)
-	version    = "0.02"
-	assetsDir  http.FileSystem
-	ioserv     *gosocketio.Server
+	nodesrv         = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
+	assetDir        = flag.String("assetdir", "", "set Web client dir")
+	mapbox          = flag.String("mapbox", "", "Set Mapbox access token")
+	port            = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
+	mu              = new(sync.Mutex)
+	version         = "0.02"
+	assetsDir       http.FileSystem
+	ioserv          *gosocketio.Server
 	sxServerAddress string
 )
 
-
 func toJSON(m map[string]interface{}, utime int64) string {
 	s := fmt.Sprintf("{\"mtype\":%d,\"id\":%d,\"time\":%d,\"lat\":%f,\"lon\":%f,\"angle\":%f,\"speed\":%d}",
-		0, int(m["vehicle_id"].(float64)),utime, m["coord"].([]interface{})[0].(float64), m["coord"].([]interface{})[1].(float64), m["angle"].(float64), int(m["speed"].(float64)))
+		0, int(m["vehicle_id"].(float64)), utime, m["coord"].([]interface{})[0].(float64), m["coord"].([]interface{})[1].(float64), m["angle"].(float64), int(m["speed"].(float64)))
 	return s
 }
 
-func handleFleetMessage(sv *gosocketio.Server, param interface{}){
-	var  bmap map[string]interface{}
+func handleFleetMessage(sv *gosocketio.Server, param interface{}) {
+	var bmap map[string]interface{}
 	utime := time.Now().Unix()
 	bmap = param.(map[string]interface{})
-	for _, v := range bmap["vehicles"].([]interface{}){
+	for _, v := range bmap["vehicles"].([]interface{}) {
 		m, _ := v.(map[string]interface{})
 		s := toJSON(m, utime)
 		sv.BroadcastToAll("event", s)
 	}
 }
 
-
-func getFleetInfo(serv string, sv *gosocketio.Server, ch chan error){
+func getFleetInfo(serv string, sv *gosocketio.Server, ch chan error) {
 	fmt.Printf("Dial to [%s]\n", serv)
-	sioClient, err := gosocketio.Dial(serv + "socket.io/?EIO=3&transport=websocket", transport.DefaultWebsocketTransport())
-	if err != nil{
-		log.Printf("SocketIO Dial error: %s",err)
+	sioClient, err := gosocketio.Dial(serv+"socket.io/?EIO=3&transport=websocket", transport.DefaultWebsocketTransport())
+	if err != nil {
+		log.Printf("SocketIO Dial error: %s", err)
 		return
 	}
 
-	sioClient.On(gosocketio.OnConnection, func(c *gosocketio.Channel, param interface{}){
+	sioClient.On(gosocketio.OnConnection, func(c *gosocketio.Channel, param interface{}) {
 		fmt.Println("Fleet-Provider socket.io connected ", c)
 	})
-		
-	sioClient.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel, param interface{}){
+
+	sioClient.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel, param interface{}) {
 		fmt.Println("Fleet-Provider socket.io disconnected ", c)
 		ch <- fmt.Errorf("Disconnected!\n")
 	})
 
-	sioClient.On("vehicle_status",  func(c *gosocketio.Channel, param interface{}){
+	sioClient.On("vehicle_status", func(c *gosocketio.Channel, param interface{}) {
 		handleFleetMessage(sv, param)
 	})
-	
+
 }
 
-
-func runFleetInfo(serv string, sv *gosocketio.Server){
+func runFleetInfo(serv string, sv *gosocketio.Server) {
 	ch := make(chan error)
 	for {
 		time.Sleep(3 * time.Second)
@@ -117,7 +116,6 @@ func assetsFileHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, file, fi.ModTime(), f)
 }
 
-
 func run_server() *gosocketio.Server {
 
 	currentRoot, err := os.Getwd()
@@ -133,20 +131,18 @@ func run_server() *gosocketio.Server {
 	server := gosocketio.NewServer()
 
 	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
-		// wait for a few milli seconds.		
+		// wait for a few milli seconds.
 		log.Printf("Connected from %s as %s", c.IP(), c.Id())
 		// sending mapbox token from provider to browser.
-		time.Sleep(1000*time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 
 		mapboxToken := os.Getenv("MAPBOX_ACCESS_TOKEN")
-		if *mapbox != ""  {
+		if *mapbox != "" {
 			mapboxToken = *mapbox
 		}
 
 		c.Emit("mapbox_token", mapboxToken)
 		log.Printf("mapbox-token transferred %s ", mapboxToken)
-
-		
 
 	})
 
@@ -184,29 +180,29 @@ func supplyRideCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			angle: flt.Angle,
 			speed: flt.Speed,
 		}
-//		jsondata, err := json.Marshal(*mm)
-//		fmt.Println("rcb",mm.GetJson())
+		//		jsondata, err := json.Marshal(*mm)
+		//		fmt.Println("rcb",mm.GetJson())
 		mu.Lock()
 		ioserv.BroadcastToAll("event", mm.GetJson())
 		mu.Unlock()
 	}
 }
 
-func reconnectClient(client *sxutil.SXServiceClient){
-	mu.Lock() // first make client into nil 
+func reconnectClient(client *sxutil.SXServiceClient) {
+	mu.Lock() // first make client into nil
 	if client.Client != nil {
 		client.Client = nil
 		log.Printf("Client reset \n")
 	}
 	mu.Unlock()
-	time.Sleep(5*time.Second) // wait 5 seconds to reconnect
-	mu.Lock() 
+	time.Sleep(5 * time.Second) // wait 5 seconds to reconnect
+	mu.Lock()
 	if client.Client == nil {
 		newClt := sxutil.GrpcConnectServer(sxServerAddress)
 		if newClt != nil {
 			log.Printf("Reconnect server [%s]\n", sxServerAddress)
 			client.Client = newClt
-		}	
+		}
 	} else { // someone may connect!
 		log.Printf("Use reconnected server\n", sxServerAddress)
 	}
@@ -223,29 +219,26 @@ func subscribeRideSupply(client *sxutil.SXServiceClient) {
 	}
 }
 
-
-
-
 func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
-	switch(sp.SupplyName){
+	switch sp.SupplyName {
 	case "GeoJson":
-			geo := &geo.Geo{}
-			err := proto.Unmarshal(sp.Cdata.Entity, geo)
-			if err == nil {
-				strjs := string(geo.Data)
-				log.Printf("Obtaining %s, id:%d, %s, len:%d ", geo.Type, geo.Id, geo.Label,len(strjs))
-				log.Printf("Data '%s'", strjs)
-				mu.Lock()
-				ioserv.BroadcastToAll("geojson", strjs)
-				mu.Unlock()
-			}
+		geo := &geo.Geo{}
+		err := proto.Unmarshal(sp.Cdata.Entity, geo)
+		if err == nil {
+			strjs := string(geo.Data)
+			log.Printf("Obtaining %s, id:%d, %s, len:%d ", geo.Type, geo.Id, geo.Label, len(strjs))
+			log.Printf("Data '%s'", strjs)
+			mu.Lock()
+			ioserv.BroadcastToAll("geojson", strjs)
+			mu.Unlock()
+		}
 	case "Lines":
 		geo := &geo.Lines{}
 		err := proto.Unmarshal(sp.Cdata.Entity, geo)
 		if err == nil {
 
 			jsonBytes, _ := json.Marshal(geo.Lines)
-//			log.Printf("Lines: %v", string(jsonBytes))
+			//			log.Printf("Lines: %v", string(jsonBytes))
 
 			mu.Lock()
 			ioserv.BroadcastToAll("lines", string(jsonBytes))
@@ -267,7 +260,6 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 
 }
 
-
 func subscribeGeoSupply(client *sxutil.SXServiceClient) {
 	for {
 		ctx := context.Background() //
@@ -279,28 +271,24 @@ func subscribeGeoSupply(client *sxutil.SXServiceClient) {
 	}
 }
 
-
-
 func supplyPAgentCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
-	switch(sp.SupplyName){
+	switch sp.SupplyName {
 	case "Agents":
-			agents := &pagent.PAgents{}
-			err := proto.Unmarshal(sp.Cdata.Entity, agents)
-			if err == nil {
-				seconds := sp.Ts.GetSeconds()
-				nanos := sp.Ts.GetNanos()
-				jsonBytes, _ := json.Marshal(agents)
-				jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}",seconds, int(nanos/1000000), string(jsonBytes));
-//				log.Printf("Lines: %v", jstr)
-				mu.Lock()
-				ioserv.BroadcastToAll("agents", jstr)
-				mu.Unlock()
-			}
+		agents := &pagent.PAgents{}
+		err := proto.Unmarshal(sp.Cdata.Entity, agents)
+		if err == nil {
+			seconds := sp.Ts.GetSeconds()
+			nanos := sp.Ts.GetNanos()
+			jsonBytes, _ := json.Marshal(agents)
+			jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}", seconds, int(nanos/1000000), string(jsonBytes))
+			//				log.Printf("Lines: %v", jstr)
+			mu.Lock()
+			ioserv.BroadcastToAll("agents", jstr)
+			mu.Unlock()
+		}
 	}
 
 }
-
-
 
 func subscribePAgentSupply(client *sxutil.SXServiceClient) {
 	for {
@@ -311,8 +299,6 @@ func subscribePAgentSupply(client *sxutil.SXServiceClient) {
 		reconnectClient(client)
 	}
 }
-
-
 
 /*
 func supplyPTCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
@@ -339,9 +325,9 @@ func subscribePTSupply(client *sxutil.SXServiceClient) {
 }
 */
 
-func monitorStatus(){
-	for{
-		sxutil.SetNodeStatus(int32(runtime.NumGoroutine()),"HV")
+func monitorStatus() {
+	for {
+		sxutil.SetNodeStatus(int32(runtime.NumGoroutine()), "HV")
 		time.Sleep(time.Second * 3)
 	}
 }
@@ -351,11 +337,11 @@ func main() {
 
 	channelTypes := []uint32{pbase.RIDE_SHARE, pbase.PEOPLE_AGENT_SVC, pbase.GEOGRAPHIC_SVC}
 	var rerr error
-	sxServerAddress , rerr = sxutil.RegisterNode(*nodesrv, "HarmoVisLayers", channelTypes, nil)
+	sxServerAddress, rerr = sxutil.RegisterNode(*nodesrv, "HarmoVisLayers", channelTypes, nil)
 	if rerr != nil {
 		log.Fatal("Can't register node ", rerr)
 	}
-	log.Printf("Connecting SynerexServer at [%s]\n",sxServerAddress)
+	log.Printf("Connecting SynerexServer at [%s]\n", sxServerAddress)
 
 	go sxutil.HandleSigInt()
 	sxutil.RegisterDeferFunction(sxutil.UnRegisterNode)
