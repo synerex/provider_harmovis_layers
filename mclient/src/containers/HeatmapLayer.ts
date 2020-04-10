@@ -26,7 +26,7 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
             elevationScale: height,
             data: movedData,
             radius: size,
-            getPosition: (d: MovedData) => [d.longitude as number, d.latitude as number]
+            getPosition: (d: MovedData) => [d.position[0] as number, d.position[1] as number]
           })
       ]
     } else {
@@ -39,7 +39,7 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
             elevationScale: height,
             cellSize: size,
             data: movedData,
-            getPosition: (d: MovedData) => [d.longitude as number, d.latitude as number]
+            getPosition: (d: MovedData) => [d.position[0] as number, d.position[1] as number]
           })
       ]
     }

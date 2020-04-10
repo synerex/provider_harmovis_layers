@@ -82,12 +82,15 @@ class App extends Container {
 		console.log('setViewState:' + data)
 		let vs = JSON.parse(data)
 		console.log('vs:',vs)
+		if (vs.pitch == undefined){
+			vs.pitch = 0.0
+		}
 		this.setState({
 			viewState: {
 				latitude: vs.lat,
 				longitude: vs.lon,
-				zoom: vs.zoom
-// 				pitch: vs.Pitch
+				zoom: vs.zoom,
+				pitch: vs.pitch
 			}
 		})
 

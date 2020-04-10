@@ -20,6 +20,7 @@
       "resolveJsonModule": true,
       "isolatedModules": true,
       "noEmit": false,
+      "strictNullChecks": false,
       "jsx": "react",
       "typeRoots" : ["src/@types" ,"./node_modules/@types"],
 //      "types": ["mapbox-gl"],
