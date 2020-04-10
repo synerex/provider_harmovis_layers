@@ -52,6 +52,8 @@ github.com/synerex/proto_geography v0.0.6 h1:vaTNZnetaS4PRvVRDA568nR4WXK9O/zJGgm
 github.com/synerex/proto_geography v0.0.6/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_geography v0.0.7 h1:4lxWv0f5Z/Q2YX8Yxb3+efc+VneOFo54Sl56TWz4uJE=
 github.com/synerex/proto_geography v0.0.7/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_geography v0.3.1 h1:lgegRSdaYty8KrRPdHzmPcIZ/XnVyZJU/0OvkzeCoxo=
+github.com/synerex/proto_geography v0.3.1/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
 github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=

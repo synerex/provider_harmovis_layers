@@ -263,7 +263,39 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
 			mu.Unlock()
 		}
+	case "ClearMoves":
+		cms := &geo.ClearMoves{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("ClearMoves: %v", string(jsonBytes))
 
+			mu.Lock()
+			ioserv.BroadcastToAll("clearMoves", string(jsonBytes))
+			mu.Unlock()
+		}
+	case "Pitch":
+		cms := &geo.Pitch{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Pitch: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("pitch", string(jsonBytes))
+			mu.Unlock()
+		}
+	case "Bearing":
+		cms := &geo.Bearing{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Bearing: %v", string(jsonBytes))
+
+			mu.Lock()
+			ioserv.BroadcastToAll("bearing", string(jsonBytes))
+			mu.Unlock()
+		}
 	}
 
 }
