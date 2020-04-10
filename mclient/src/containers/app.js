@@ -59,6 +59,9 @@ class App extends Container {
 		socket.on('lines', this.getLines.bind(this))
 		socket.on('agents', this.getAgents.bind(this))
 		socket.on('viewstate', this.getViewState.bind(this))
+		socket.on('pitch', this.getPitch.bind(this))
+		socket.on('bearing', this.getBearing.bind(this))
+		socket.on('clearMoves', this.getClearMoves.bind(this))
 
 		socket.on('mapbox_token', (token) => {
 			console.log('Token Got:' + token)
@@ -76,6 +79,21 @@ class App extends Container {
 		console.log('Geojson:' + data.length)
 		console.log(data)
 		this.setState({ geojson: JSON.parse(data) })
+	}
+	getClearMoves (data) {
+		console.log('GetClearMoves:' + data)
+		this.deleteMovebase(0)
+	}
+
+	getBearing (data) {
+		console.log('Bearing:' + data)
+		console.log(this.props.actions)
+		this.props.actions.setViewport({bearing:data.bearing})	
+	}
+	getPitch (data) {
+		console.log('Pitch:' + data)
+		const pitch = data.pitch
+		this.props.actions.setViewport({pitch})	
 	}
 
 	getViewState (data) {
