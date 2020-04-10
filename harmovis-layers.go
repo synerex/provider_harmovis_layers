@@ -36,6 +36,7 @@ var (
 	assetsDir       http.FileSystem
 	ioserv          *gosocketio.Server
 	sxServerAddress string
+	mapboxToken     string
 )
 
 func toJSON(m map[string]interface{}, utime int64) string {
@@ -141,7 +142,7 @@ func run_server() *gosocketio.Server {
 		// sending mapbox token from provider to browser.
 		time.Sleep(1000 * time.Millisecond)
 
-		mapboxToken := os.Getenv("MAPBOX_ACCESS_TOKEN")
+		mapboxToken = os.Getenv("MAPBOX_ACCESS_TOKEN")
 		if *mapbox != "" {
 			mapboxToken = *mapbox
 		}
@@ -257,6 +258,8 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			log.Printf("ViewState: %v", string(jsonBytes))
 
 			mu.Lock()
+			ioserv.BroadcastToAll("mapbox_token", mapboxToken)
+
 			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
 			mu.Unlock()
 		}
