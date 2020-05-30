@@ -14,8 +14,8 @@ require (
 	github.com/synerex/synerex_api v0.3.1
 	github.com/synerex/synerex_proto v0.1.6
 	github.com/synerex/synerex_sxutil v0.4.10
-	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
+	golang.org/x/net v0.0.0-20200528225125-3c3fba18258b // indirect
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
-	google.golang.org/genproto v0.0.0-20200521103424-e9a78aa275b7 // indirect
+	google.golang.org/genproto v0.0.0-20200528191852-705c0b31589b // indirect
 	google.golang.org/grpc v1.29.1 // indirect
 )

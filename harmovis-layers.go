@@ -373,6 +373,7 @@ func monitorStatus() {
 }
 
 func main() {
+	log.Printf("HarmovisLayers(%s) built %s sha1 %s", sxutil.GitVer, sxutil.BuildTime, sxutil.Sha1Ver)
 	flag.Parse()
 
 	channelTypes := []uint32{pbase.RIDE_SHARE, pbase.PEOPLE_AGENT_SVC, pbase.GEOGRAPHIC_SVC}
