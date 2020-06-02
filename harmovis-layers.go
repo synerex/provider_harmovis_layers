@@ -139,17 +139,27 @@ func run_server() *gosocketio.Server {
 	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
 		// wait for a few milli seconds.
 		log.Printf("Connected from %s as %s", c.IP(), c.Id())
-		// sending mapbox token from provider to browser.
-		time.Sleep(1000 * time.Millisecond)
+		// Not emit at connection sending mapbox token from provider to browser.
+		/*
+			time.Sleep(1000 * time.Millisecond)
+			mapboxToken = os.Getenv("MAPBOX_ACCESS_TOKEN")
+			if *mapbox != "" {
+				mapboxToken = *mapbox
+			}
 
+			c.Emit("mapbox_token", mapboxToken)
+			log.Printf("mapbox-token transferred %s ", mapboxToken)
+		*/
+	})
+
+	server.On("get_mapbox_token", func(c *gosocketio.Channel) {
+		log.Printf("Requested mapbox access token")
 		mapboxToken = os.Getenv("MAPBOX_ACCESS_TOKEN")
 		if *mapbox != "" {
 			mapboxToken = *mapbox
 		}
-
 		c.Emit("mapbox_token", mapboxToken)
 		log.Printf("mapbox-token transferred %s ", mapboxToken)
-
 	})
 
 	server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {
@@ -229,22 +239,24 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 	switch sp.SupplyName {
 	case "GeoJson":
 		geo := &geo.Geo{}
+		log.Printf("GeoJson: %d bytes", len(sp.Cdata.Entity))
 		err := proto.Unmarshal(sp.Cdata.Entity, geo)
 		if err == nil {
 			strjs := string(geo.Data)
 			log.Printf("Obtaining %s, id:%d, %s, len:%d ", geo.Type, geo.Id, geo.Label, len(strjs))
-			log.Printf("Data '%s'", strjs)
+			//			log.Printf("Data '%s'", strjs)
 			mu.Lock()
 			ioserv.BroadcastToAll("geojson", strjs)
 			mu.Unlock()
 		}
 	case "Lines":
 		geo := &geo.Lines{}
+		log.Printf("Lines: %d", len(sp.Cdata.Entity))
 		err := proto.Unmarshal(sp.Cdata.Entity, geo)
 		if err == nil {
 
 			jsonBytes, _ := json.Marshal(geo.Lines)
-			//			log.Printf("Lines: %v", string(jsonBytes))
+			log.Printf("LinesParsed: %d", len(jsonBytes))
 
 			mu.Lock()
 			ioserv.BroadcastToAll("lines", string(jsonBytes))
@@ -258,11 +270,24 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			log.Printf("ViewState: %v", string(jsonBytes))
 
 			mu.Lock()
-			ioserv.BroadcastToAll("mapbox_token", mapboxToken)
+			//ioserv.BroadcastToAll("mapbox_token", mapboxToken)
 
 			ioserv.BroadcastToAll("viewstate", string(jsonBytes))
 			mu.Unlock()
 		}
+
+	case "BarGraphs":
+		bargraphs := &geo.BarGraphs{}
+		err := proto.Unmarshal(sp.Cdata.Entity, bargraphs)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(bargraphs)
+			jsonStr := string(jsonBytes)
+			log.Printf("BarGraphs: %v", jsonStr)
+			mu.Lock()
+			ioserv.BroadcastToAll("bargraphs", jsonStr)
+			mu.Unlock()
+		}
+
 	case "ClearMoves":
 		cms := &geo.ClearMoves{}
 		err := proto.Unmarshal(sp.Cdata.Entity, cms)
@@ -397,7 +422,7 @@ func main() {
 
 	client := sxutil.GrpcConnectServer(sxServerAddress) // if there is server address change, we should do it!
 
-	argJSON := fmt.Sprintf("{Client:Map:RIDE")
+	argJSON := fmt.Sprintf("{Client:Map:RIDE}")
 	rideClient := sxutil.NewSXServiceClient(client, pbase.RIDE_SHARE, argJSON)
 
 	argJSON2 := fmt.Sprintf("{Client:Map:PAGENT}")
