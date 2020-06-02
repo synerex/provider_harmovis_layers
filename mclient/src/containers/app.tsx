@@ -115,23 +115,15 @@ class App extends Container<any,any> {
 	}
 
 	getBearing (data :any ) {
-		console.log('Bearing:' + data)
+//		console.log('Bearing:' + data)
 //		console.log(this.props.actions)
-		const bearing = parseFloat(JSON.parse(data).bearing)
-		this.props.actions.setViewport({bearing})
+		this.props.actions.setViewport({bearing:data})
 	}
-
 	
 	getPitch (data :any) {
-		console.log('Pitch:' + data)
-		const pitch = parseFloat(JSON.parse(data).pitch)
-		let pv = this.props.viewport
-		pv.pitch = data.pitch
-		console.log(pv)
-
-		this.props.actions.setViewport(pv)
+//		console.log('Pitch:' + data)
+		this.props.actions.setViewport({pitch:data})
 	}
-
 
 	getViewState (data: any) {
 		console.log('setViewState:' + data)

@@ -124,8 +124,8 @@ function startRecivedData() {
         } as SocketMessage<AgentData>)
     })
     socket.on('pitch', (str: string) =>{
-        console.log('Pitch:' + str)
-        let payload:number =JSON.parse(str).bearing;
+//        console.log('Pitch:' + str)
+        let payload:number =JSON.parse(str).pitch;
         if (payload == undefined ){
             payload = 0
         }
