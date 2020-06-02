@@ -12,6 +12,8 @@ import HeatmapHeight from '../containers/HeatmapHeight'
 import ToggleHeatMap from '../containers/ToggleHeatMap'
 import Toggle3DHeatmap from '../containers/Toggle3DHeatmap'
 import HeatmapTypeSelection from '../containers/HeatmapSelection'
+import BargraphController from './BarGraphController'
+
 //import { HeatmapState } from '../reducer/heatmapSettings'
 
 /*interface Props extends BasedProps{
@@ -154,15 +156,16 @@ export default class Controller extends React.Component<ControllerProps, ContSta
             <li>
               <div className='form-check'>
                 <input type='checkbox' id='MoveDataChecked' onChange={getMoveDataChecked} className='form-check-input' defaultChecked={true} />
-                <label htmlFor='MoveDataChecked' className='form-check-label'>運行データ表示</label>
+                <label htmlFor='MoveDataChecked' className='form-check-label'>移動データ表示</label>
               </div>
             </li>
             <li>
               <div className='form-check'>
                 <input type='checkbox' id='MoveOptionChecked' onChange={getMoveOptionChecked} className='form-check-input' />
-                <label htmlFor='MoveOptionChecked' className='form-check-label'>運行データオプション表示</label>
+                <label htmlFor='MoveOptionChecked' className='form-check-label'>移動データオプション表示</label>
               </div>
             </li>
+            {/*
             <li>
               <div className='form-check'>
                 <input type='checkbox' id='DepotOptionChecked' onChange={getDepotOptionChecked} className='form-check-input' />
@@ -175,14 +178,17 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                 <label htmlFor='OptionChangeChecked' className='form-check-label'>オプション表示パターン切替</label>
               </div>
             </li>
+            */}
+
             <li><span>ナビゲーションパネル</span>
               <div className='btn-group d-flex' role='group'>
                 <NavigationButton buttonType='zoom-in' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
                 <NavigationButton buttonType='zoom-out' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
                 <NavigationButton buttonType='compass' actions={actions} viewport={viewport} className='btn btn-outline-light btn-sm w-100' />
               </div>
-            </li>
-            <li><span>コントロールパネル</span>
+            </li>            
+
+            <li>　{/*<span>コントロールパネル</span>*/}
               <div className='btn-group d-flex' role='group'>
                 {animatePause ?
                   <PlayButton actions={actions} className='btn btn-outline-light btn-sm w-100' /> :
@@ -193,7 +199,8 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                   <ReverseButton actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 }
               </div>
-              <div className='btn-group d-flex' role='group'>
+              {/* we do no need specific time control 
+               <div className='btn-group d-flex' role='group'>
                 <AddMinutesButton addMinutes={-5} actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 <AddMinutesButton addMinutes={-1} actions={actions} className='btn btn-outline-light btn-sm w-100' />
               </div>
@@ -201,6 +208,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                 <AddMinutesButton addMinutes={1} actions={actions} className='btn btn-outline-light btn-sm w-100' />
                 <AddMinutesButton addMinutes={5} actions={actions} className='btn btn-outline-light btn-sm w-100' />
               </div>
+              */}
             </li>
             <li>
               再現中日時&nbsp;<SimulationDateTime settime={settime} />
@@ -213,7 +221,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               <label htmlFor='SpeedRange'>スピード<SpeedValue secperhour={secperhour} actions={actions} />秒/時</label>
               <SpeedRange secperhour={secperhour} actions={actions} id='SpeedRange' className='form-control-range' />
             </li>
-            <li><div>移動データ操作0</div>
+            <li>
               <div className='btn-group d-flex' role='group'>
                 <button onClick={this.deleteMovebase.bind(this,0)} className='btn btn-outline-light btn-sm w-100'>
                   <span className='button_span'><Icon icon={icDelete} />&nbsp; 全移動データ削除</span>
@@ -221,9 +229,10 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               </div>
             </li>
           </ul>
-            <figure>
-              <figcaption>ヒートマップの設定</figcaption>
-              <ol>
+          <div className="option-list"> 
+            <label htmlFor="item1">ヒートマップの設定</label>
+            <input type="checkbox" id="item1"></input> 
+            <ul>
               <li>
                 ヒートマップ表示: <ToggleHeatMap />
               </li>
@@ -239,9 +248,12 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               <li>
                 グリッド形式: <HeatmapTypeSelection />
               </li>
-              </ol>
-            </figure>
+            </ul>
 
+            <label htmlFor="item2">棒グラフの設定</label>
+            <input type="checkbox" id="item2"></input> 
+            <BargraphController />
+         </div>
         </div>
       </div>
     )

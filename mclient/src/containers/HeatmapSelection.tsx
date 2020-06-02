@@ -1,7 +1,9 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { HeatmapState, HeatmapType } from '../reducer/heatmapSettings'
+import { HeatmapState } from '../reducer/heatmapSettings'
 import * as actions from '../actions/actions'
+import { GridType } from '../constants/MapSettings'
+
 
 const HeatmapTypeSelection: React.FC = (props: any)  => {
   const state = useSelector<any, HeatmapState>(st => {
@@ -9,12 +11,13 @@ const HeatmapTypeSelection: React.FC = (props: any)  => {
   })
   const dispatcher = useDispatch()
   const onChangeHandler = (ev: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatcher(actions.selectHeatmapType(ev.currentTarget.value as HeatmapType))
+    dispatcher(actions.selectHeatmapType(ev.currentTarget.value as GridType))
   }
   return (
+    
     <select value={state.selectedType} onChange={onChangeHandler}>
-      <option value={HeatmapType.Hexagon}>Hexagon</option>
-      <option value={HeatmapType.Grid}>Grid</option>
+      <option value={GridType.Hexagon}>Hexagon</option>
+      <option value={GridType.Grid}>Grid</option>
     </select>
   )
 }

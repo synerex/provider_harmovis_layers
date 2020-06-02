@@ -14,7 +14,7 @@ const HeatmapHeight: React.FC<HeatmapHeightProps> = (props: HeatmapHeightProps) 
   })
   const dispatcher = useDispatch()
   const onChangeHandler = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("ChangeHeight"+ev.currentTarget.value)
+//    console.log("ChangeHeight"+ev.currentTarget.value)
     dispatcher(actions.setHeatmapHeight(parseInt(ev.currentTarget.value)))
   }
   const { min, max } = props

@@ -1,33 +1,79 @@
 import React from 'react'
+
+import { useSelector, useDispatch } from 'react-redux'
+import * as actions from '../actions/actions'
+
 import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
-	LoadingIcon, FpsDisplay, DepotsLayer, EventInfo, MovesbaseOperation, MovesBase, BasedProps
+	LoadingIcon, FpsDisplay, Movesbase, Actions, LineMapLayer
 } from 'harmoware-vis'
 
-import HeatmapLayer from './HeatmapLayer'
 // import './App.scss';
-
 // import { StaticMap,  } from 'react-map-gl';
-import { Layer } from '@deck.gl/core'
-import DeckGL from '@deck.gl/react'
+//import { Layer } from '@deck.gl/core'
+
 import {GeoJsonLayer, LineLayer} from '@deck.gl/layers'
 
-import {_MapContext as MapContext, InteractiveMap, NavigationControl} from 'react-map-gl'
+import BarLayer from './BarLayer'
+import BarGraphInfoCard from '../components/BarGraphInfoCard'
+import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } from '../actions/actions'
+import store from '../store'
+import { BarData } from '../constants/bargraph'
+import { Line } from '../constants/line'
+import InfomationBalloonLayer from './InfomationBalloonLayer'
+import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
+
+import { AgentData } from '../constants/agent'
+import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
+		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg } from '../constants/workerMessageTypes'
+
+
 
 import Controller from '../components/controller'
+import HeatmapLayer from './HeatmapLayer'
+import layerSettings from '../reducer/layerSettings'
 
-import * as io from 'socket.io-client'
+class App extends Container<any,any> {
+	private lines = 0;
 
-const MAPBOX_TOKEN = process.env.MAPBOX_ACCESS_TOKEN // Acquire Mapbox accesstoken
-
-class App extends Container {
-	constructor (props) {
+	constructor (props: any) {
 		super(props)
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
+		const worker = new Worker('socketWorker.js'); // worker for socket-io communication.
+		const self = this;
+		worker.onmessage = (e) => {
+			const msg = e.data;
+			if (isBarGraphMsg(msg)) {
+				self.getBargraph(msg.payload)
+			} else if (isAgentMsg(msg)) {
+				self.getAgents(msg.payload)
+			} else if (isLineMsg(msg)) {
+				self.getLines(msg.payload)
+			} else if (isGeoJsonMsg(msg)) {
+				self.getGeoJson(msg.payload)
+			} else if (isPitchMsg(msg)) {
+				self.getPitch(msg.payload)
+			} else if (isBearingMsg(msg)) {
+				self.getBearing(msg.payload)
+			} else if (isClearMovesMsg(msg)) {
+				self.deleteMovebase(0)
+//			 	self.getAgents(msg.payload)
+			} else if(isMapboxToken(msg)) {
+				this.setState({
+					mapbox_token: msg.payload
+				});
+				console.log("Mapbox Token Assigned:"+msg.payload)
+			} else if (msg.type === 'CONNECTED') {
+				console.log('connected')
+			} else if (isViewStateMsg(msg)) {
+				self.getViewState(msg.payload)
+			}
+
+		}
+
 		setSecPerHour(3600)
 		setLeading(3)
 		setTrailing(3)
-		const socket = io()
 		this.state = {
 			moveDataVisible: true,
 			moveOptionVisible: false,
@@ -36,8 +82,8 @@ class App extends Container {
 			optionChange: false,
 			mapbox_token: '',
 			geojson: null,
-			lines: [],
-			viewState: {
+//			lines: [],
+/*			viewState: {
 				longitude: 136.8163486 ,
 				latitude: 34.8592285,
 				zoom: 17,
@@ -45,106 +91,100 @@ class App extends Container {
 				pitch: 0,
 				width: 500,
 				height: 500
-			},
+			}, */
 			linecolor: [0,155,155],
 			popup: [0, 0, '']
 		}
 
-		this._onViewStateChange = this._onViewStateChange.bind(this)
-
-		// for receiving event info.
-		socket.on('connect', () => { console.log('Socket.IO connected!') })
-		socket.on('event', this.getEvent.bind(this))
-		socket.on('geojson', this.getGeoJson.bind(this))
-		socket.on('lines', this.getLines.bind(this))
-		socket.on('agents', this.getAgents.bind(this))
-		socket.on('viewstate', this.getViewState.bind(this))
-		socket.on('pitch', this.getPitch.bind(this))
-		socket.on('bearing', this.getBearing.bind(this))
-		socket.on('clearMoves', this.getClearMoves.bind(this))
-
-		socket.on('mapbox_token', (token) => {
-			console.log('Token Got:' + token)
-			this.setState({ mapbox_token: token })
-		})
-
-		socket.on('disconnect', () => { console.log('Socket.IO disconnected!') })
+//		this._onViewStateChange = this._onViewStateChange.bind(this)
 	}
+	
 
-	bin2String (array) {
+	bin2String (array :any) {
 		return String.fromCharCode.apply(String, array)
   	}
 
-	getGeoJson (data) {
+	getGeoJson (data :string) {
 		console.log('Geojson:' + data.length)
-		console.log(data)
+//		console.log(data)
 		this.setState({ geojson: JSON.parse(data) })
 	}
-	getClearMoves (data) {
+	getClearMoves (data :any) {
 		console.log('GetClearMoves:' + data)
 		this.deleteMovebase(0)
 	}
 
-	getBearing (data) {
+	getBearing (data :any ) {
 		console.log('Bearing:' + data)
-		console.log(this.props.actions)
-		this.props.actions.setViewport({bearing:data.bearing})	
-	}
-	getPitch (data) {
-		console.log('Pitch:' + data)
-		const pitch = data.pitch
-		this.props.actions.setViewport({pitch})	
+//		console.log(this.props.actions)
+		const bearing = parseFloat(JSON.parse(data).bearing)
+		this.props.actions.setViewport({bearing})
 	}
 
-	getViewState (data) {
+	
+	getPitch (data :any) {
+		console.log('Pitch:' + data)
+		const pitch = parseFloat(JSON.parse(data).pitch)
+		let pv = this.props.viewport
+		pv.pitch = data.pitch
+		console.log(pv)
+
+		this.props.actions.setViewport(pv)
+	}
+
+
+	getViewState (data: any) {
 		console.log('setViewState:' + data)
 		let vs = JSON.parse(data)
-		console.log('vs:',vs)
 		if (vs.pitch == undefined){
 			vs.pitch = 0.0
 		}
-		this.setState({
-			viewState: {
-				latitude: vs.lat,
-				longitude: vs.lon,
-				zoom: vs.zoom,
-				pitch: vs.pitch
-			}
-		})
+		let pv = this.props.viewport
+//		console.log("SetViewport",pv)
 
+		const vp  =	{
+			latitude: vs.lat,
+			longitude: vs.lon,
+			zoom: vs.zoom,
+			pitch: vs.pitch
+		}
+
+	// Hook cannot be used under class...
+//		const dispatch = useDispatch()
+//		dispatch(this.props.actions.setViewport(vp))
+
+		this.props.actions.setViewport(vp)
+		
 // 		this.map.getMap().flyTo({ center: [vs.Lon, vs.Lat], zoom:vs.Zoom, pitch: vs.Pitch })
 
 	}
 
-	getLines (data) {
-		console.log('getLines!:' + data.length)
-// 		console.log(data)
-		if (this.state.lines.length > 0) {
-			const ladd = JSON.parse(data)
-			const lbase = this.state.lines
-			const lists = lbase.concat(ladd)
-			this.setState({ lines: lists })
-		} else {
-			this.setState({ lines: JSON.parse(data) })
-		}
+	getLines (data :Line[]) {
+//		console.log('getLines!:' + data.length)
+//		console.log(this.props.actions)
+
+//		console.log(actions.addLineData)//(data)
+		store.dispatch(actions.addLineData(data))
+				
+/* 		console.log(data)
+//		if (this.state.lines.length > 0) {
+//			const ladd = JSON.parse(data)
+//			const lbase = this.state.lines
+			const lists = lbase.concat(data)
+//			this.setState({ lines: lists })   // shoul not use
+//		} else {
+//			this.setState({ lines: data })
+//		}
+*/
 	}
 
-	getAgents (data) {
+	getAgents (dt : AgentData) { // receive Agents information from worker thread.
 		const { actions, movesbase } = this.props
-// 		console.log(data)
-// 		console.log('DT')
-		const dt = JSON.parse(data)
 		const agents = dt.dt.agents
-// 		console.log(dt)
-// 		console.log(agents)
-
 		const time = dt.ts // set time as now. (If data have time, ..)
-// 		let hit = false;
-// 		const movesbasedata = [...movesbase]; // why copy !?
 		let  setMovesbase = []
 
 		if (movesbase.length == 0) {
-// 			console.log("Initial!:" + agents.length)
 			for (let i = 0, len = agents.length; i < len; i++) {
 				setMovesbase.push({
 					mtype: 0,
@@ -160,10 +200,7 @@ class App extends Container {
 					}]
 				})
 			}
-// we may refresh viewport
-
 		} else {
-// 			console.log("Aget Update!" + data.length+":"+ agents[0])
 			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
 				movesbase[i].arrivaltime = time
 				movesbase[i].operation.push({
@@ -173,15 +210,38 @@ class App extends Container {
 					color: [100,100,0],
 					speed: 0.5
 				})
-// 				setMovesbase.push(movesbase[i]);
 			}
 			setMovesbase = movesbase
 		}
-
 		actions.updateMovesBase(setMovesbase)
 	}
 
-	getEvent (socketData) {
+	
+	getBargraph (data: any) {
+		const { actions, movesbase } = this.props
+		const bars = data;
+		let  setMovesbase = [...movesbase]
+		
+		for (const barData of bars) {
+			const base = (setMovesbase as Movesbase[]).find((m: any)=> m.id === barData.id)
+			if (base) {
+				base.operation.push(barData)
+			} else {
+				setMovesbase.push({
+					mtype: 0,
+					id: barData.id,
+					departuretime: barData.elapsedtime,
+					arrivaltime: barData.elapsedtime,
+					operation: [barData]
+				} as Movesbase)
+			}
+			this._updateBalloonInfo(barData);
+		}
+		actions.updateMovesBase(setMovesbase);
+	}
+
+
+	getEvent (socketData:any) {
 		const { actions, movesbase } = this.props
 		const { mtype, id, lat, lon, angle, speed } = JSON.parse(socketData)
 		// 	console.log("dt:",mtype,id,time,lat,lon,angle,speed, socketData);
@@ -222,10 +282,10 @@ class App extends Container {
 		actions.updateMovesBase(setMovesbase)
 	}
 
-	deleteMovebase (maxKeepSecond) {
+	deleteMovebase (maxKeepSecond :any) {
 		const { actions, animatePause, movesbase, settime } = this.props
 		const movesbasedata = [...movesbase]
-		const setMovesbase = []
+		const setMovesbase :any[] = []
 		let dataModify = false
 		const compareTime = settime - maxKeepSecond
 
@@ -260,56 +320,69 @@ class App extends Container {
 			if (!animatePause) {
 				actions.setAnimatePause(false)
 			}
-		console.log('viewState')
+//		console.log('viewState')
 // 		console.log(this.map.getMap())
-		console.log(this.state.viewState)
+//		console.log(this.state.viewState)
 
 // 		this.map.getMap().flyTo({ center: [-118.4107187, 33.9415889] })
 // 		console.log(this.state.viewState)
 // 		console.log(MapContext.viewport)
 	}
 
-	getMoveDataChecked (e) {
+	getMoveDataChecked (e :any) {
 		this.setState({ moveDataVisible: e.target.checked })
 	}
 
-	getMoveOptionChecked (e) {
+	getMoveOptionChecked (e :any) {
 		this.setState({ moveOptionVisible: e.target.checked })
 	}
 
-	getDepotOptionChecked (e) {
+	getDepotOptionChecked (e :any) {
 		this.setState({ depotOptionVisible: e.target.checked })
 	}
 
-	getOptionChangeChecked (e) {
+	getOptionChangeChecked (e :any) {
 		this.setState({ optionChange: e.target.checked })
 	}
 
-	initialize (gl) {
+	initialize (gl :any) {
 		gl.enable(gl.DEPTH_TEST)
 		gl.depthFunc(gl.LEQUAL)
 		console.log('GL Initialized!')
 	}
 
-	logViewPort (state,view) {
+	logViewPort (state :any,view :any) {
 		console.log('Viewport changed!', state, view)
 	}
 
-	handleStyleLoad (map) {
+	handleStyleLoad (map :any){
 		console.log('StyleLoad:Map',map)
 	}
 
-	_onViewStateChange ({viewState}) {
+	/*
+	_onViewStateChange ({viewState} :any) {
 		this.setState({viewState})
+	}*/
+	
+	componentDidMount(){
+		super.componentDidMount();
+		// make zoom level 20!
+//		let pv = this.props.viewport
+//		pv.maxZoom = 20
+		this.props.actions.setViewport({maxZoom:20})
+		const { setNoLoop } = this.props.actions
+		setNoLoop(true);
 	}
 
 	render () {
 		const props = this.props
-		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading,
-			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType} = props
+		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines,
+			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
+			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
+		} = props
 		// 	const { movesFileName } = inputFileName;
-		const optionVisible = false
-		const onHover = (el) => {
+//		const optionVisible = false
+		const onHover = (el :any) => {
 			if (el && el.object) {
 				let disptext = ''
 				const objctlist = Object.entries(el.object)
@@ -325,7 +398,30 @@ class App extends Container {
 		}
 		let layers = []
 
+		layers.push(new BarLayer({
+			id: 'bar-layer',
+			data: movedData,
+			movesbase: movesbase,
+			currentTime: settime,
+			widthRatio,
+			heightRatio,
+			radiusRatio,
+			selectBarGraph: this._selectBarGraph,
+		    titlePositionOffset: titlePosOffset,
+			titleSize,		    
+			showTitle, 
+		}))
+
+		layers.push(new InfomationBalloonLayer({
+			id: 'info-layer',
+			infoList: infoBalloonList,
+			handleIconClicked: (id) => {
+				store.dispatch(removeBallonInfo(id));
+			}
+		}))
+
 		if (this.state.geojson != null) {
+//			console.log("geojson rendering"+this.state.geojson.length)
 			layers.push(
 			new GeoJsonLayer({
 				id: 'geojson-layer',
@@ -348,18 +444,29 @@ class App extends Container {
 			}))
 		}
 
-		if (this.state.lines.length > 0) {
-			this.lines = 0
+		if (lines.length > 0) {
+//			this.lines = 0
 			layers.push(
 				new LineLayer({
 					visible: true,
-					data: this.state.lines,
-					getSourcePosition: d => d.from,
-					getTargetPosition: d => d.to,
+					data: lines,
+					getSourcePosition: (d :any) => d.from,
+					getTargetPosition: (d :any) => d.to,
 					getColor: this.state.linecolor,
 					getWidth: 1.0,
 					widthMinPixels: 0.5
 				})
+
+/*
+				new LineMapLayer({
+					data: lines,
+					getSourcePosition: (d :any) => d.from,
+					getTargetPosition: (d :any) => d.to,
+					getColor: this.state.linecolor,
+					getWidth: (d:any) => 1.0
+				})
+*/
+
 			)
 
 		}
@@ -367,23 +474,27 @@ class App extends Container {
 		if (this.state.moveDataVisible && movedData.length > 0) {
 			layers.push(
 				new MovesLayer({
-					viewport, routePaths, movesbase, movedData,
-					clickedObject, actions, lightSettings,
+					routePaths, 
+					movesbase, 
+					movedData,
+					clickedObject, 
+					actions,
 					visible: this.state.moveDataVisible,
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.03,
 					layerOpacity: 0.8,
-					getRaduis: 0.2,
-					getStrokeWidth: 0.1,
-					getColor : [0,200,20],
+					getRouteWidth: () => 0.2,
+//					getStrokeWidth: 0.1,
+//					getColor : [0,200,20],
 					optionCellSize: 2,
 					sizeScale: 20,
 					iconChange: false,
 					optionChange: false, // this.state.optionChange,
 					onHover
-				})
+				}) as any
 			)
 		}
+
 
 		if (enabledHeatmap) {
 			layers.push(
@@ -398,56 +509,25 @@ class App extends Container {
 			)
 		}
 
-		const onViewportChange = this.props.onViewportChange || actions.setViewport
-		const {viewState} = this.state
-
-		const mapboxMap = <InteractiveMap
-			ref={(e) => { this.map = e }}
-			viewport={viewport}
-			mapStyle={'mapbox://styles/mapbox/dark-v8'}
-			onViewportChange={onViewportChange}
-			mapboxApiAccessToken={this.state.mapbox_token}
-			visible={true}
-// 			onStyleLoad={this.handleStyleLoad}
-			>
-		</InteractiveMap>
+//		const onViewportChange = this.props.onViewportChange || actions.setViewport
+//	    const {viewState} = this.state
 
 		// wait until mapbox_token is given from harmo-vis provider.
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
-				<DeckGL
-					viewState = {viewState}
+				<HarmoVisLayers 
+					visible={true}
+					viewport={viewport}
+					mapboxApiAccessToken={this.state.mapbox_token}
+					mapboxAddLayerValue={null}
+					actions={actions}
 					layers={layers}
-					onWebGLInitialized={this.initialize}
-					initialViewState={{longitude: 136.8163486 , latitude: 34.8592285, zoom: 17}}
-					controller={true}
-					ContextProvider={MapContext.Provider}
-					onViewStateChange={this._onViewStateChange}
-				>
-					{mapboxMap}
-				</DeckGL>
+				/>
 				: <LoadingIcon loading={true} />
 
-/*					<div style={{ position: "absolute", left: 30, top: 120, zIndex: 1 }}>
-						<NavigationControl />
-					</div>
-				*/
-
-			/*				<InteractiveMap
-					viewport={viewport}
-					mapStyle={'mapbox://styles/mapbox/dark-v8'}
-					onViewportChange={onViewportChange}
-					mapboxApiAccessToken={this.state.mapbox_token}
-					visible={true}>
-
-					<DeckGL viewState={viewport} layers={layers} onWebGLInitialized={this.initialize} />
-
-				</InteractiveMap>
-				: <LoadingIcon loading={true} />;
-*/
 		return (
 			<div>
-				<Controller {...props}
+				<Controller {...(props as any)}
 					deleteMovebase={this.deleteMovebase.bind(this)}
 					getMoveDataChecked={this.getMoveDataChecked.bind(this)}
 					getMoveOptionChecked={this.getMoveOptionChecked.bind(this)}
@@ -460,7 +540,7 @@ class App extends Container {
 				<svg width={viewport.width} height={viewport.height} className='harmovis_overlay'>
 					<g fill='white' fontSize='12'>
 						{this.state.popup[2].length > 0 ?
-							this.state.popup[2].split('\n').map((value, index) =>
+							this.state.popup[2].split('\n').map((value :any, index :number) =>
 								<text
 									x={this.state.popup[0] + 10} y={this.state.popup[1] + (index * 12)}
 									key={index.toString()}
@@ -470,8 +550,70 @@ class App extends Container {
 				</svg>
 
 				<FpsDisplay />
+				<div style={{
+						width: '100%',
+						position: 'absolute',
+						bottom: 10
+					}}>
+				</div>
+				{
+					this._renderBarGraphInfo()
+				}
+
 			</div>
 		)
 	}
+
+	_renderBarGraphInfo = () => {
+		const { selectedBarData } = this.props;
+		if (selectedBarData) {
+			return <BarGraphInfoCard 
+				data={selectedBarData}
+				onClose={() => {
+					this._selectBarGraph(null)
+				}}
+			/>
+		}
+	}
+	_updateSelectedBarGraph = (barData: BarData) => {
+		const { selectedBarData } = this.props;
+		if (selectedBarData && selectedBarData.id === barData.id) {
+			store.dispatch(selectBarGraph(barData))
+		}
+	}
+
+	_updateBalloonInfo = (data: BarData|null) => {
+		if (data) {
+			const { infoBalloonList } = this.props;
+			const balloon = infoBalloonList.find((i: BalloonInfo) => i.id === data.id)
+			if (balloon) {
+				this._selectBarGraph(data);
+			}
+		}
+	}
+
+	_selectBarGraph = (data: BarData|null) => {
+		if (!!data) {
+			const { infoBalloonList } = this.props;
+			const ballon = infoBalloonList.find((i: BalloonInfo) => i.id === data.id)
+			const newInfo: BalloonInfo = {
+				id: data.id as string,
+				titleColor: [0xff, 0xff, 0xff],
+				position: data.position?? [],
+				title: data.text,
+				items: data.data.map((item): BalloonItem => ({
+					text: (item.label+' : '+item.value),
+					color: item.color
+				})),
+			}
+
+			if (!ballon) {
+				store.dispatch(appendBallonInfo(newInfo))
+			} else {
+				store.dispatch(updateBallonInfo(newInfo))
+			}
+		}
+	}
+	
 }
 export default connectToHarmowareVis(App)

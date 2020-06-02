@@ -1,0 +1,40 @@
+.bargraph-card {
+    z-index: 999;
+    width: 300px;
+    position: absolute;
+    padding: 10px;
+    left: 20px;
+    top: 20px;
+    background-color: #333333;
+    color: #cccccc;
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 24px;
+    }
+    &__content {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.bargraph-carditem {
+    font-size: 14px;
+    color: #cccccc;
+    display: flex;
+    
+}
+
+.bargraph-carditem__content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.bargraph-carditem__start {
+    width: 29%;
+}
+.bargraph-carditem__end {
+    display: flex;
+    justify-content: space-between;
+    width: 70%;
+}

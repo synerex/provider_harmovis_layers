@@ -1,9 +1,9 @@
 import { LayerProps, CompositeLayer, HexagonLayer, GridLayer } from 'deck.gl'
 import { MovedData } from 'harmoware-vis'
-import { HeatmapType } from '../reducer/heatmapSettings'
+import { GridType } from '../constants/MapSettings'
 
 interface HeatmapLayerProps extends LayerProps {
-  type: HeatmapType
+  type: GridType
   movedData: MovedData[]
   size: number
   height: number
@@ -16,7 +16,7 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
 
   renderLayers () {
     const { movedData, type, size, height, visible, extruded } = this.props
-    if (type === HeatmapType.Hexagon) {
+    if (type === GridType.Hexagon) {
       return [
         new HexagonLayer({
             visible,

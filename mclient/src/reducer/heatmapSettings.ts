@@ -1,14 +1,10 @@
 import { isType } from 'typescript-fsa'
 import { Action } from 'redux'
 import * as actions from '../actions/actions'
-
-export enum HeatmapType {
-  Hexagon= 'Hexagon',
-  Grid= 'Grid'
-}
+import { GridType } from '../constants/MapSettings'
 
 export interface HeatmapState {
-  selectedType: HeatmapType
+  selectedType: GridType
   particleCount: number
   gridSize: number
   gridHeight: number
@@ -17,7 +13,7 @@ export interface HeatmapState {
 }
 
 const initialState: HeatmapState  = {
-  selectedType: HeatmapType.Hexagon,
+  selectedType: GridType.Hexagon,
   enabledHeatmap: true,
   gridSize: 40,
   gridHeight: 10,

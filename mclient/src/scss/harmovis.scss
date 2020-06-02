@@ -221,3 +221,48 @@ div.harmovis_controller_new {
     justify-content: center;
   }
 }
+
+
+div.option-list {
+  label {
+    display: block;
+//    margin: 0;
+//   padding: 0.5rem;
+//    background: #ddd;
+    cursor: pointer;
+
+    &:hover {
+      background: #ccc;
+    }
+  }
+  input {
+    display: none;
+    &:checked + ul {
+      display: block;
+    }
+  }
+  ul {
+    display: none;
+    list-style-type: decimal;
+    margin-top: 0;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+    
+    li {
+      display: list-item;
+      input {
+        display:inline-block;
+      }
+      margin: 0px 0px 8px 0px;
+    }
+
+//    background: #eee;
+//    list-style: none;
+//@debug    margin: 0;
+//    padding: 1rem;
+  }
+
+}
