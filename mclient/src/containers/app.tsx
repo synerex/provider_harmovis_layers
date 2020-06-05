@@ -217,8 +217,10 @@ class App extends Container<any,any> {
 		for (const barData of bars) {
 			const base = (setMovesbase as Movesbase[]).find((m: any)=> m.id === barData.id)
 			if (base) {
+//				console.log("updateBardata",barData.id)
 				base.operation.push(barData)
 			} else {
+//				console.log("NewBardata",barData.id)
 				setMovesbase.push({
 					mtype: 0,
 					id: barData.id,

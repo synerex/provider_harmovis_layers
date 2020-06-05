@@ -60,11 +60,21 @@ const createGradientColorGenerator = (minValue:number|undefined, maxValue:number
     const basegreen = 0;
     const basered = 255;
     const ratio = 255/(max-min)
-    return (value: number|undefined) => {
-        const v = value ? (value > max ? max : (value < min ? min : value)) : 0
-        let green = basegreen + ratio*(v - min)
-        let red = basered - ratio*(v - min)
-        return [Math.floor(red),  Math.floor(green), 0]
+    if (ratio < 0) {
+        const rt = -ratio;
+        return (value: number|undefined) => {
+            const v = value ? (value < max ? max : (value > min ? min : value)) : 0
+            let green = basegreen + rt*(v - max)
+            let red = basered - rt*(v - max)
+            return [Math.floor(red),  Math.floor(green), 0]
+        }        
+    }else{
+        return (value: number|undefined) => {
+            const v = value ? (value > max ? max : (value < min ? min : value)) : 0
+            let green = basegreen + ratio*(v - min)
+            let red = basered - ratio*(v - min)
+            return [Math.floor(red),  Math.floor(green), 0]
+        }
     }
 }
 
@@ -76,13 +86,13 @@ const getData = (bar: any) => {
     const isHexa = shapeType === 1;
     const colorGenerator = createGradientColorGenerator(bar.min, bar.max)
 //    console.log('time is ' + time)
-    return {
+    const r =  {
         id: bar.id,
         movesbaseidx: bar.id,
-        sourcePosition: [],
-        sourceColor: [],
-        targetPosition: [],
-        targetColor: [],
+        sourcePosition: [] as number[],
+        sourceColor: [] as number[],
+        targetPosition: [] as number[],
+        targetColor: [] as number[],
         elapsedtime: time,
         position: [bar.lon, bar.lat, 0],
         angle: 0,
@@ -92,7 +102,7 @@ const getData = (bar: any) => {
         data: bar.barData.map((b: any) => {
             return {
                 value: b.value,
-                color: isVarColor ? toArrayColor(b.color) : colorGenerator(b.value),
+                color: isVarColor ?   colorGenerator(b.value):toArrayColor(b.color),
                 label: b.label,
             }
         }),
@@ -101,7 +111,9 @@ const getData = (bar: any) => {
         min: bar.min,
         max: bar.max,
         text: bar.text,
-    } as BarData
+    } 
+//    console.log("BarData:",r)
+    return r as BarData
 }
 
 function startRecivedData() {
