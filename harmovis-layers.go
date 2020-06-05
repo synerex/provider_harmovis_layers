@@ -321,6 +321,41 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 			ioserv.BroadcastToAll("bearing", string(jsonBytes))
 			mu.Unlock()
 		}
+
+	case "Arcs":
+		cms := &geo.Arcs{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Arcs: %v", string(jsonBytes))
+			mu.Lock()
+			ioserv.BroadcastToAll("arcs", string(jsonBytes))
+			mu.Unlock()
+		}
+
+	case "ClearArcs":
+		log.Printf("clearArc!")
+		mu.Lock()
+		ioserv.BroadcastToAll("clearArcs", string(0))
+		mu.Unlock()
+
+	case "Scatters":
+		cms := &geo.Scatters{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("Scatters: %v", string(jsonBytes))
+			mu.Lock()
+			ioserv.BroadcastToAll("scatters", string(jsonBytes))
+			mu.Unlock()
+		}
+
+	case "ClearScatters":
+		log.Printf("clearScatter!")
+		mu.Lock()
+		ioserv.BroadcastToAll("clearScatters", string(0))
+		mu.Unlock()
+
 	}
 
 }

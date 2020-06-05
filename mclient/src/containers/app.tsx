@@ -12,7 +12,7 @@ import {
 // import { StaticMap,  } from 'react-map-gl';
 //import { Layer } from '@deck.gl/core'
 
-import {GeoJsonLayer, LineLayer} from '@deck.gl/layers'
+import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from '@deck.gl/layers'
 
 import BarLayer from './BarLayer'
 import BarGraphInfoCard from '../components/BarGraphInfoCard'
@@ -20,18 +20,22 @@ import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } 
 import store from '../store'
 import { BarData } from '../constants/bargraph'
 import { Line } from '../constants/line'
+import { Arc, Scatter } from '../constants/geoObjects'
+
 import InfomationBalloonLayer from './InfomationBalloonLayer'
 import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
-		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg } from '../constants/workerMessageTypes'
+		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
+		isClearArcMsg, isScatterMsg, isClearScatterMsg
+	} from '../constants/workerMessageTypes'
 
 
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
-import layerSettings from '../reducer/layerSettings'
+//import layerSettings from '../reducer/layerSettings'
 
 class App extends Container<any,any> {
 	private lines = 0;
@@ -67,6 +71,14 @@ class App extends Container<any,any> {
 				console.log('connected')
 			} else if (isViewStateMsg(msg)) {
 				self.getViewState(msg.payload)
+			} else if (isArcMsg(msg)){
+				self.addArc(msg.payload)
+			} else if (isClearArcMsg(msg)){
+				self.clearArc()
+			} else if (isScatterMsg(msg)){
+				self.addScatter(msg.payload)								
+			} else if (isClearScatterMsg(msg)){
+				self.clearScatter()
 			}
 
 		}
@@ -150,6 +162,33 @@ class App extends Container<any,any> {
 // 		this.map.getMap().flyTo({ center: [vs.Lon, vs.Lat], zoom:vs.Zoom, pitch: vs.Pitch })
 
 	}
+
+	addArc (data : Arc[]){
+		console.log('getArcs!:' + data.length)
+		console.log(this.props)
+		console.log(this.state)
+
+		store.dispatch(actions.addArcData(data))
+		
+	}
+
+	clearArc (){
+		console.log('clearArcs')
+		store.dispatch(actions.clearArcData())
+	}
+
+	addScatter(data : Scatter[]){
+		console.log('getScatter!:' + data.length)
+		store.dispatch(actions.addScatterData(data))
+	}
+
+	clearScatter (){
+		console.log('clearScatter' )
+		store.dispatch(actions.clearScatterData())
+	}
+
+
+
 
 	getLines (data :Line[]) {
 //		console.log('getLines!:' + data.length)
@@ -370,7 +409,8 @@ class App extends Container<any,any> {
 
 	render () {
 		const props = this.props
-		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines,
+		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines, arcs, scatters,
+			arcVisible, scatterVisible, scatterFill, scatterMode, 
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
 			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
 		} = props
@@ -464,6 +504,43 @@ class App extends Container<any,any> {
 			)
 
 		}
+
+		if (arcs.length > 0) {
+			layers.push(
+				new ArcLayer({
+								id: 'arc-layer',
+								visible: arcVisible,
+								data: arcs,
+								getSourcePosition: (d :any) => d.src,
+								getTargetPosition: (d :any) => d.tgt,
+								getSourceColor: (d :any) => d.srcCol,
+								getTargetColor: (d :any) => d.tgtCol,
+								getTilt: (d :any) => d.tilt| 0, 
+								getWidth: 2.0,
+								widthMinPixels: 1,
+							})
+			)
+		}
+
+		if (scatters.length > 0) {
+			layers.push(
+				new ScatterplotLayer({
+								id: 'scatterplot-layer',
+								visible: scatterVisible,
+								radiusUnits: scatterMode, 
+								data: scatters,
+								filled: scatterFill, 
+								getPosition: (d :any) => d.pos,
+								getRadius: (d :any) => d.radius,
+								getFillColor: (d :any) => d.fillCol,
+								getLineColor: (d :any) => d.lineCol ,
+								getLineWidth: (d :any) => d.lineWid| 1,
+								linewidthMinPixels: 1,
+								radiusMinPixels: 1,
+							})
+			)
+		}
+			
 
 		if (this.state.moveDataVisible && movedData.length > 0) {
 			layers.push(

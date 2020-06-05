@@ -4,9 +4,9 @@ import { GridType } from '../constants/MapSettings'
 import { BarData } from '../constants/bargraph'
 import { BalloonInfo } from '../constants/informationBalloon'
 import { Line } from '../constants/line'
+import { Arc, Scatter} from '../constants/geoObjects'
 
 const actionCreator = actionCreatorFactory()
-
 
 // heatmap
 export const setParticleCount = actionCreator<number>(types.SET_PARTICLE_COUNT)
@@ -32,3 +32,12 @@ export const removeBallonInfo = actionCreator<string>('REMOVE_BALLOON_INFO');
 
 // line
 export const addLineData = actionCreator<Line[]>('ADD_LINE_DATA');
+
+// arc
+export const addArcData = actionCreator<Arc[]>('ADD_ARC_DATA');
+export const clearArcData = actionCreator('CLEAR_ARC_DATA');
+
+// scatter
+export const addScatterData = actionCreator<Scatter[]>('ADD_SCATTER_DATA');
+export const clearScatterData = actionCreator('CLEAR_SCATTER_DATA');
+export const setScatterInfo = actionCreator('SET_SCATTER_INFO');

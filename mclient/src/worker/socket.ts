@@ -3,10 +3,11 @@ import { BarData } from '../constants/bargraph';
 import { AgentData } from '../constants/agent';
 import { Line } from '../constants/line';
 import { SocketMessage } from '../constants/workerMessageTypes';
+import { Arc, Scatter} from '../constants/geoObjects';
 const socket = io();
 
 var wcounter = 0
-//console.log("Worker wokring!")
+console.log("Worker working!")
 
 socket.on('disconnect', () => { console.log('Socket.IO disconnected!') })
 const worker = self as any
@@ -116,6 +117,12 @@ const getData = (bar: any) => {
     return r as BarData
 }
 
+
+function color2array(col:number) : number[] {
+    return [(col >>> 16)%256, (col >>> 8)%256, col % 256]
+}
+
+
 function startRecivedData() {
     socket.on('bargraphs', (str: string) => {
         console.log('Bargraphs:' + str.length)
@@ -199,5 +206,63 @@ function startRecivedData() {
         } as SocketMessage<string> );
     })
 
+    socket.on('arcs', (payload: string) =>{
+        console.log("Receive Arcs!:"+payload)
+        const data = JSON.parse(payload)
+        var arcs: Arc[] =[]
+
+        for (var i = 0; i < data.srcs.length; i++){
+            arcs.push({
+                src: [data.srcs[i].lon, data.srcs[i].lat],
+                tgt: [data.tgts[i].lon, data.tgts[i].lat],
+                srcCol: color2array(data.srcCols[i]),
+                tgtCol: color2array(data.tgtCols[i]),
+                tilt: data.tilts[i]
+            })
+        }
+
+        worker.postMessage({
+            type: 'RECEIVED_ARCS',
+            payload: arcs
+        } as SocketMessage<Arc[]> );
+    })
+
+    socket.on('clearArcs', (payload: string) =>{
+        worker.postMessage({
+            type: 'RECEIVED_CLEAR_ARCS',
+            payload
+        } as SocketMessage<string> );
+    })
+        
+    socket.on('scatters', (payload: string) =>{
+        console.log("Receive Scatters!:"+payload)
+        const data = JSON.parse(payload)
+        var scatters : Scatter[] = []
+
+        for (var i = 0; i < data.points.length; i++){
+            scatters.push({
+                pos: [data.points[i].lon, data.points[i].lat],
+                radius: data.radiuses[i],
+                fillCol: color2array(data.fillColors[i]),
+                lineCol: color2array(data.lineColors[i]),
+                lineWid: 2
+            });
+        }
+
+        worker.postMessage({
+            type: 'RECEIVED_SCATTERS',
+            payload: scatters
+        } as SocketMessage<Scatter[]> );
+    })
+
+    socket.on('clearScatters', (payload: string) =>{
+        worker.postMessage({
+            type: 'RECEIVED_CLEAR_SCATTERS',
+            payload
+        } as SocketMessage<string> );
+    })
+
+
+    
 
 }
