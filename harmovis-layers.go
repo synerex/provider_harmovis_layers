@@ -356,6 +356,20 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 		ioserv.BroadcastToAll("clearScatters", string(0))
 		mu.Unlock()
 
+	case "TopTextLabel":
+		log.Printf("labelInfo!")
+		cms := &geo.TopTextLabel{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+
+			jsonBytes, _ := json.Marshal(cms)
+			log.Printf("LabelInfo: %v", string(jsonBytes))
+			mu.Lock()
+			ioserv.BroadcastToAll("topLabelInfo", string(jsonBytes))
+			mu.Unlock()
+
+		}
+
 	}
 
 }

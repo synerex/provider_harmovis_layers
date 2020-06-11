@@ -266,3 +266,15 @@ div.option-list {
   }
 
 }
+
+// for TopTextLabel
+div.top_text_layer{
+  position: absolute;
+  z-index: 200;
+  font-size: 18px;
+  top: 10px;
+  left: 10px;
+  width: 400px;
+  color: rgb(255,255,255);
+;  text-align: center;
+}

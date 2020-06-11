@@ -1,6 +1,6 @@
 {
   "name": "harmovis-layers",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Harmoware-VIS Layers Synerex provider",
   "main": "index.js",
   "scripts": {
@@ -24,17 +24,18 @@
     "@deck.gl/layers": "8.1.9",
     "@deck.gl/react": "8.1.9",
     "@loaders.gl/core": "2.1.6",
-    "@types/jest": "25.2.3",
+    "@types/jest": "26.0.0",
     "@types/mapbox-gl": "1.10.2",
-    "@types/node": "14.0.11",
+    "@types/node": "14.0.13",
     "@types/rc-slider": "8.6.5",
     "@types/sharedworker": "^0.0.29",
     "@types/socket.io-client": "1.4.33",
     "babel-loader": "^8.1.0",
     "bootstrap": "^4.5.0",
+    "create-react-class": "^15.6.3",
     "css-loader": "^3.5.3",
     "hard-source-webpack-plugin": "^0.13.1",
-    "harmoware-vis": "1.6.4",
+    "harmoware-vis": "1.6.7",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -50,10 +51,11 @@
     "typescript-fsa": "^3.0.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "xss": "^1.0.7"
   },
   "devDependencies": {
-    "@types/react": "16.9.35",
+    "@types/react": "16.9.36",
     "@types/react-dom": "16.9.8",
     "@types/react-redux": "7.1.9",
     "copy-webpack-plugin": "^6.0.2",
@@ -61,6 +63,6 @@
     "typescript": "3.9.5"
   },
   "resolutions": {
-    "@types/react": "16.9.35"
+    "@types/react": "16.9.36"
   }
 }

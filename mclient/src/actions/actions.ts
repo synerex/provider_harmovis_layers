@@ -4,7 +4,7 @@ import { GridType } from '../constants/MapSettings'
 import { BarData } from '../constants/bargraph'
 import { BalloonInfo } from '../constants/informationBalloon'
 import { Line } from '../constants/line'
-import { Arc, Scatter} from '../constants/geoObjects'
+import { Arc, Scatter, LabelInfo} from '../constants/geoObjects'
 
 const actionCreator = actionCreatorFactory()
 
@@ -41,3 +41,6 @@ export const clearArcData = actionCreator('CLEAR_ARC_DATA');
 export const addScatterData = actionCreator<Scatter[]>('ADD_SCATTER_DATA');
 export const clearScatterData = actionCreator('CLEAR_SCATTER_DATA');
 export const setScatterInfo = actionCreator('SET_SCATTER_INFO');
+
+// label
+export const setTopLabelInfo = actionCreator<LabelInfo>('SET_LABEL_INFO');

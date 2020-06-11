@@ -83,3 +83,10 @@ declare module "@deck.gl/core" {
     }): void;
   }
 }
+
+
+declare module "react-inline-css" {
+    class InlineCss<P extends LayerProps,S={}>{
+
+    }  
+}

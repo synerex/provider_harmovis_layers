@@ -1,9 +1,11 @@
 import io from 'socket.io-client';
+import xss from 'xss';
+
 import { BarData } from '../constants/bargraph';
 import { AgentData } from '../constants/agent';
 import { Line } from '../constants/line';
 import { SocketMessage } from '../constants/workerMessageTypes';
-import { Arc, Scatter} from '../constants/geoObjects';
+import { Arc, Scatter, LabelInfo} from '../constants/geoObjects';
 const socket = io();
 
 var wcounter = 0
@@ -124,6 +126,8 @@ function color2array(col:number) : number[] {
 
 
 function startRecivedData() {
+    const xssFilter = new xss.FilterXSS({})
+
     socket.on('bargraphs', (str: string) => {
         console.log('Bargraphs:' + str.length)
         const rawData = JSON.parse(str);
@@ -262,6 +266,20 @@ function startRecivedData() {
         } as SocketMessage<string> );
     })
 
+    socket.on('topLabelInfo', (payload: string) =>{
+        console.log("Receive LabelInfo!:"+payload)
+        const data = JSON.parse(payload)
+        // we have to check CSS! (using validator) here
+
+        const labelInfo:LabelInfo = {
+            label: xssFilter.process(data.label) as string,
+            style: data.style
+        }
+        worker.postMessage({
+            type: 'RECEIVED_LABEL_INFO',
+            payload: labelInfo
+        } as SocketMessage<LabelInfo> );
+    })
 
     
 

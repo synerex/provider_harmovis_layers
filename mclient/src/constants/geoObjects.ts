@@ -1,3 +1,4 @@
+
 export interface Arc  {
     src: number[],
     tgt: number[],
@@ -14,3 +15,8 @@ export interface Scatter  {
     lineWid?: number
 }
 
+
+export interface LabelInfo {
+    label: string,
+    style: string
+}

@@ -14,12 +14,12 @@ export interface BarGraphState {
 }
 
 const initialState: BarGraphState  = {
-  heightRatio: 100,
+  heightRatio: 20,
   widthRatio: 1,
   radiusRatio: 1,
   selectedBarData: null,
   titlePosOffset: 50,
-  titleSize: 26,
+  titleSize: 20,
   showTitle: false
 }
 

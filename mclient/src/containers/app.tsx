@@ -28,10 +28,9 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg
 	} from '../constants/workerMessageTypes'
-
-
+import  TopTextLayer  from '../components/TopTextLayer'
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
@@ -79,6 +78,9 @@ class App extends Container<any,any> {
 				self.addScatter(msg.payload)								
 			} else if (isClearScatterMsg(msg)){
 				self.clearScatter()
+			} else if (isLabelInfoMsg(msg)){
+				console.log("LabelText")
+				store.dispatch(actions.setTopLabelInfo(msg.payload))
 			}
 
 		}
@@ -402,7 +404,7 @@ class App extends Container<any,any> {
 		// make zoom level 20!
 //		let pv = this.props.viewport
 //		pv.maxZoom = 20
-		this.props.actions.setViewport({maxZoom:20})
+		this.props.actions.setViewport({maxZoom:20, minZoom:1})
 		const { setNoLoop } = this.props.actions
 		setNoLoop(true);
 	}
@@ -413,6 +415,7 @@ class App extends Container<any,any> {
 			arcVisible, scatterVisible, scatterFill, scatterMode, 
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
 			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
+			labelText, labelStyle
 		} = props
 		// 	const { movesFileName } = inputFileName;
 //		const optionVisible = false
@@ -556,7 +559,8 @@ class App extends Container<any,any> {
 					layerOpacity: 0.8,
 					getRouteWidth: () => 0.2,
 //					getStrokeWidth: 0.1,
-//					getColor : [0,200,20],
+//					getColor : [0,200,20] as number[],
+					getArchWidth: (x : any) => 0.2, 
 					optionCellSize: 2,
 					sizeScale: 20,
 					iconChange: false,
@@ -598,6 +602,7 @@ class App extends Container<any,any> {
 
 		return (
 			<div>
+				<TopTextLayer labelText={labelText} labelStyle={labelStyle}/>
 				<Controller {...(props as any)}
 					deleteMovebase={this.deleteMovebase.bind(this)}
 					getMoveDataChecked={this.getMoveDataChecked.bind(this)}

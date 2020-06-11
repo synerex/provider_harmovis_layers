@@ -36,6 +36,16 @@ const initialScatterState: ScatterLayerState  = {
   scatterVisible: true
 }
 
+export interface TopTextLayerState {
+  labelText: string,
+  labelStyle: string
+}
+
+const initialTopTextLayerState: TopTextLayerState  = {
+  labelText: "",
+  labelStyle:""
+}
+
 
 export const lineSettings = (state = initialLineState, action: Action): LineLayerState => {
   if (isType(action, actions.addLineData)) {
@@ -93,3 +103,16 @@ export const scatterSettings = (state = initialScatterState, action: Action): Sc
   return state
 }
 
+
+
+export const topTextReducer = (state = initialTopTextLayerState, action: Action): TopTextLayerState=> {
+  if (isType(action, actions.setTopLabelInfo)) {
+    console.log("add LabelInfo!",action.payload)
+    return {
+      ...state,
+      labelText: action.payload.label,   // may concatenate...
+      labelStyle: action.payload.style
+    }
+  }
+  return state
+}
