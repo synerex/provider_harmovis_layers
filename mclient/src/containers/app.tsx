@@ -140,12 +140,13 @@ class App extends Container<any,any> {
 	}
 
 	getViewState (data: any) {
+		let pv = this.props.viewport
 		console.log('setViewState:' + data)
+		console.log('currentViewState:',pv)
 		let vs = JSON.parse(data)
 		if (vs.pitch == undefined){
-			vs.pitch = 0.0
+			vs.pitch = pv.pitch
 		}
-		let pv = this.props.viewport
 //		console.log("SetViewport",pv)
 
 		const vp  =	{
