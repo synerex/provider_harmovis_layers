@@ -336,7 +336,7 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 	case "ClearArcs":
 		log.Printf("clearArc!")
 		mu.Lock()
-		//		ioserv.BroadcastToAll("clearArcs", string(0))
+		ioserv.BroadcastToAll("clearArcs", string(0))
 		mu.Unlock()
 
 	case "Scatters":

@@ -139,13 +139,18 @@ class App extends Container<any,any> {
 		this.props.actions.setViewport({pitch:data})
 	}
 
+
+	// if pitch/zoom < 0 then use current value
 	getViewState (data: any) {
 		let pv = this.props.viewport
 		console.log('setViewState:' + data)
 		console.log('currentViewState:',pv)
 		let vs = JSON.parse(data)
-		if (vs.pitch == undefined){
+		if (vs.pitch == undefined || vs.pitch < 0){
 			vs.pitch = pv.pitch
+		}
+		if (vs.zoom == undefined || vs.zoom < 0){
+			vs.zoom = pv.zoom
 		}
 //		console.log("SetViewport",pv)
 
