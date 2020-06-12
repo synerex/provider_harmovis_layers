@@ -2,7 +2,7 @@ import { getCombinedReducer } from 'harmoware-vis'
 import { createStore, applyMiddleware } from 'redux'
 import heatmapSettings from './reducer/heatmapSettings'
 import barGraphSettings from './reducer/barGraphSettings'
-import {lineSettings, arcSettings, scatterSettings, topTextReducer
+import {lineSettings, arcSettings, scatterSettings, topTextReducer, geoJsonSettings
 } from './reducer/layerSettings'
 import createSagaMiddleware from 'redux-saga'
 import informationBalloon from './reducer/informationBalloon'
@@ -16,6 +16,7 @@ const store = createStore(
     barGraphSettings,
     informationBalloon,
     lineSettings,
+    geoJsonSettings,
     arcSettings,
     scatterSettings,
     topTextReducer,

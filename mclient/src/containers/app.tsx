@@ -95,7 +95,7 @@ class App extends Container<any,any> {
 			heatmapVisible: false,
 			optionChange: false,
 			mapbox_token: '',
-			geojson: null,
+//			geojson: null,
 //			lines: [],
 /*			viewState: {
 				longitude: 136.8163486 ,
@@ -121,7 +121,8 @@ class App extends Container<any,any> {
 	getGeoJson (data :string) {
 		console.log('Geojson:' + data.length)
 //		console.log(data)
-		this.setState({ geojson: JSON.parse(data) })
+//		this.setState({ geojson: JSON.parse(data) })
+		store.dispatch(actions.addGeoJsonData(data))
 	}
 	getClearMoves (data :any) {
 		console.log('GetClearMoves:' + data)
@@ -417,7 +418,7 @@ class App extends Container<any,any> {
 
 	render () {
 		const props = this.props
-		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines, arcs, scatters,
+		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines, arcs, scatters, geojson,
 			arcVisible, scatterVisible, scatterFill, scatterMode, 
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
 			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
@@ -463,12 +464,12 @@ class App extends Container<any,any> {
 			}
 		}))
 
-		if (this.state.geojson != null) {
+		if (geojson != null) {
 //			console.log("geojson rendering"+this.state.geojson.length)
 			layers.push(
 			new GeoJsonLayer({
 				id: 'geojson-layer',
-				data: this.state.geojson,
+				data: geojson,
 				pickable: true,
 				stroked: false,
 				filled: true,

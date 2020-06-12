@@ -30,6 +30,9 @@ export const appendBallonInfo = actionCreator<BalloonInfo>('APPEND_BALLOON_INFO'
 export const updateBallonInfo = actionCreator<BalloonInfo>('UPDATE_BALLOON_INFO');
 export const removeBallonInfo = actionCreator<string>('REMOVE_BALLOON_INFO');
 
+// json
+export const addGeoJsonData = actionCreator<string>('ADD_GEOJSON_DATA');
+
 // line
 export const addLineData = actionCreator<Line[]>('ADD_LINE_DATA');
 

@@ -12,6 +12,15 @@ const initialLineState: LineLayerState  = {
     lines: []
 }
 
+export interface GeoJsonState {
+  geojson: any
+}
+
+const initialGeoJsonState: GeoJsonState  = {
+  geojson: null
+}
+
+
 export interface ArcLayerState {
   arcs: Arc[],
   arcVisible: boolean
@@ -45,6 +54,26 @@ const initialTopTextLayerState: TopTextLayerState  = {
   labelText: "",
   labelStyle:""
 }
+
+export const geoJsonSettings = (state = initialGeoJsonState, action: Action): GeoJsonState => {
+  if (isType(action, actions.addGeoJsonData)) {
+    if (action.payload != null){
+      console.log("add GeoJson!"+action.payload.length)
+      if (action.payload == ""){
+        return {
+          ...state,
+          geojson: null
+        }
+      }
+      return {
+        ...state,
+        geojson: JSON.parse(action.payload)  // may concatenate...
+      }
+    }
+  }
+  return state
+}
+
 
 
 export const lineSettings = (state = initialLineState, action: Action): LineLayerState => {
@@ -86,7 +115,7 @@ export const scatterSettings = (state = initialScatterState, action: Action): Sc
         scatters: action.payload   // may concatenate...
       }
   } else if (isType(action, actions.clearScatterData)) {
-      console.log("clear Arcs")
+      console.log("clear Scatters")
       return {
         ...state,
         scatters: []

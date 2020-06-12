@@ -1,6 +1,6 @@
 {
   "name": "harmovis-layers",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Harmoware-VIS Layers Synerex provider",
   "main": "index.js",
   "scripts": {

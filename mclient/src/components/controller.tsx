@@ -14,6 +14,11 @@ import Toggle3DHeatmap from '../containers/Toggle3DHeatmap'
 import HeatmapTypeSelection from '../containers/HeatmapSelection'
 import BargraphController from './BarGraphController'
 
+// for clearArc / Scatter
+import * as actions from '../actions/actions'
+import store from '../store'
+
+
 //import { HeatmapState } from '../reducer/heatmapSettings'
 
 /*interface Props extends BasedProps{
@@ -76,6 +81,13 @@ export default class Controller extends React.Component<ControllerProps, ContSta
 
   deleteMovebase (maxKeepSecond : any) {
     this.props.deleteMovebase(maxKeepSecond)
+  }
+
+  deleteArcScatterbase(){    
+    store.dispatch(actions.clearArcData())
+    store.dispatch(actions.clearScatterData())
+    store.dispatch(actions.addLineData([]))// clear line
+    store.dispatch(actions.addGeoJsonData(""))
   }
 
   clearAllRoute () {
@@ -224,7 +236,10 @@ export default class Controller extends React.Component<ControllerProps, ContSta
             <li>
               <div className='btn-group d-flex' role='group'>
                 <button onClick={this.deleteMovebase.bind(this,0)} className='btn btn-outline-light btn-sm w-100'>
-                  <span className='button_span'><Icon icon={icDelete} />&nbsp; 全移動データ削除</span>
+                  <span className='button_span'><Icon icon={icDelete} />Clear Move</span>
+                </button>
+                <button onClick={this.deleteArcScatterbase.bind(this,0)} className='btn btn-outline-light btn-sm w-100'>
+                  <span className='button_span'><Icon icon={icDelete} />Clear Obj</span>
                 </button>
               </div>
             </li>
