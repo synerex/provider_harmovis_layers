@@ -32,7 +32,6 @@ var (
 	mapbox          = flag.String("mapbox", "", "Set Mapbox access token")
 	port            = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
 	mu              = new(sync.Mutex)
-	version         = "0.02"
 	assetsDir       http.FileSystem
 	ioserv          *gosocketio.Server
 	sxServerAddress string
@@ -464,7 +463,7 @@ func main() {
 	wg := sync.WaitGroup{} // for syncing other goroutines
 
 	ioserv = run_server()
-	fmt.Printf("Running HarmoVisLayers Server..\n")
+
 	if ioserv == nil {
 		os.Exit(1)
 	}
@@ -494,7 +493,7 @@ func main() {
 	serveMux.Handle("/socket.io/", ioserv)
 	serveMux.HandleFunc("/", assetsFileHandler)
 
-	log.Printf("Starting Harmoware-VIS Layers  Provider %s  on port %d", version, *port)
+	log.Printf("Starting Harmoware-VIS Layers Provider %s on port %d", sxutil.GitVer, *port)
 	err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *port), serveMux)
 	if err != nil {
 		log.Fatal(err)
