@@ -85,6 +85,8 @@ github.com/synerex/proto_geography v0.4.1 h1:62sc2WcPLYSxT6CLKIAubZzUKa65o01lUxJ
 github.com/synerex/proto_geography v0.4.1/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_geography v0.4.2 h1:Ejv319X2FhWhZd54dGQYWmxBQoew4s0wjavYVRL8Kxg=
 github.com/synerex/proto_geography v0.4.2/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_geography v0.5.0 h1:P0wIGNYWFMhQFDKZWNjNP8wrT7ICI73zFN2R7lQFD68=
+github.com/synerex/proto_geography v0.5.0/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
 github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=
@@ -175,6 +177,8 @@ google.golang.org/genproto v0.0.0-20200610104632-a5b850bcf112 h1:iwoQI4kCHAgRg0o
 google.golang.org/genproto v0.0.0-20200610104632-a5b850bcf112/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/genproto v0.0.0-20200611194920-44ba362f84c1 h1:rRk0Nk0YJuu8qID4s2qgHG/WOMKXFafQ0/4vD/6/EuM=
 google.golang.org/genproto v0.0.0-20200611194920-44ba362f84c1/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
+google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11 h1:II66Di7x1uAfKBfe3OchemS7pUg9ahSr7qAP3bD0+Mo=
+google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.23.1/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
