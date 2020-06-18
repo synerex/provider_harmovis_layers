@@ -57,6 +57,10 @@ export const isLabelInfoMsg = (msg: WorkerMessage): msg is SocketMessage<LabelIn
     return msg.type === 'RECEIVED_LABEL_INFO'
 }
 
+export const isHarmoVISConfMsg = (msg: WorkerMessage): msg is SocketMessage<any> => {
+    return msg.type === 'RECEIVED_HARMOVIS_CONF'
+}
+
 
 export type SocketMsgTypes = 'RECEIVED_AGENT'| 'CONNECTED'| 'RECEIVED_MAPBOX_TOKEN'
      | 'RECEIVED_BAR_GRAPHS'
@@ -71,4 +75,5 @@ export type SocketMsgTypes = 'RECEIVED_AGENT'| 'CONNECTED'| 'RECEIVED_MAPBOX_TOK
      | 'RECEIVED_SCATTERS'
      | 'RECEIVED_CLEAR_SCATTERS'
      | 'RECEIVED_LABEL_INFO'
+     | 'RECEIVED_HARMOVIS_CONF'
      ;

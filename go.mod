@@ -9,13 +9,14 @@ require (
 	github.com/shirou/gopsutil v2.20.5+incompatible // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/synerex/proto_fleet v0.0.1
-	github.com/synerex/proto_geography v0.5.0
+	github.com/synerex/proto_geography v0.5.1
 	github.com/synerex/proto_people_agent v0.0.1
 	github.com/synerex/synerex_api v0.3.1
 	github.com/synerex/synerex_proto v0.1.6
 	github.com/synerex/synerex_sxutil v0.4.11
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
-	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
-	google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11 // indirect
+	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
+	golang.org/x/text v0.3.3 // indirect
+	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088 // indirect
 	google.golang.org/grpc v1.29.1 // indirect
 )

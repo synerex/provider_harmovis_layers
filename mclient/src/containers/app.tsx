@@ -28,7 +28,7 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg
 	} from '../constants/workerMessageTypes'
 import  TopTextLayer  from '../components/TopTextLayer'
 
@@ -81,6 +81,8 @@ class App extends Container<any,any> {
 			} else if (isLabelInfoMsg(msg)){
 				console.log("LabelText")
 				store.dispatch(actions.setTopLabelInfo(msg.payload))
+			} else if (isHarmoVISConfMsg(msg)){
+				self.resolveHarmoVISConf(msg.payload)
 			}
 
 		}
@@ -93,6 +95,9 @@ class App extends Container<any,any> {
 			moveOptionVisible: false,
 			depotOptionVisible: false,
 			heatmapVisible: false,
+			mapVisible: true,
+			controlVisible: true,
+			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
 //			geojson: null,
@@ -111,6 +116,86 @@ class App extends Container<any,any> {
 		}
 
 //		this._onViewStateChange = this._onViewStateChange.bind(this)
+	}
+
+	resolveHarmoVISConf(conf: any){
+		console.log("Resolve HarmoVISConf",conf)
+		if (conf.setNoLoop != undefined){
+			this.props.actions.setNoLoop(conf.setNoLoop);
+		}
+		if (conf.mapVisible != undefined){
+			this.setState({mapVisible: conf.mapVisible});
+		}
+		if (conf.moveDataVisible != undefined){
+			this.setState({moveDataVisible: conf.moveDataVisible});
+		}
+		if (conf.moveOptionVisible != undefined){
+			this.setState({moveOptionVisible: conf.moveOptionVisible});
+		}
+		if (conf.moveOptionVisible != undefined){
+			this.setState({moveOptionVisible: conf.moveOptionVisible});
+		}
+		if (conf.depotOptionVisible != undefined){
+			this.setState({depotOptionVisible: conf.depotOptionVisible});
+		}
+		if (conf.heatmapVisible != undefined){
+			store.dispatch(actions.toggleHeatmap(conf.heatmapVisible));
+		}
+		if (conf.heatmapType != undefined){			
+			store.dispatch(actions.selectHeatmapType(conf.heatmapType))
+		}
+		if (conf.heatmap3D != undefined){			
+			store.dispatch(actions.extrudeHeatmap(conf.heatmap3D))
+		}
+		if (conf.heatmapRadius != undefined){			
+			store.dispatch(actions.setHeatmapRadius(conf.heatmapRadius))
+		}
+		if (conf.heatmapHeight != undefined){			
+			store.dispatch(actions.setHeatmapHeight(conf.heatmapHeight))
+		}
+		if (conf.barHeight != undefined){			
+			store.dispatch(actions.changeBarHeight(conf.barHeight))
+		}
+		if (conf.barWidth != undefined){			
+			store.dispatch(actions.changeBarHeight(conf.barWidth))
+		}
+		if (conf.barRadius != undefined){			
+			store.dispatch(actions.changeBarRadius(conf.barRadius))
+		}
+		if (conf.barTitleVisible != undefined){			
+			store.dispatch(actions.showBarTitle(conf.barTitleVisible))
+		}
+		if (conf.barTitleOffset != undefined){			
+			store.dispatch(actions.changeBarTitlePosOffset(conf.barTitleOffset))
+		}
+		if (conf.barTitleSize != undefined){			
+			store.dispatch(actions.changeBarTitleSize(conf.barTitleSize))
+		}
+		if (conf.secPerHour != undefined){			
+			this.props.actions.setSecPerHour(conf.secPerHour)
+		}
+		if (conf.setTime != undefined){			
+			if (conf.setTime < 0){
+				this.props.actions.setTime(this.props.timeLength + conf.setTime+this.props.timeBegin)
+			}else{
+				this.props.actions.setTime(conf.setTime+this.props.timeBegin)
+			}
+		}
+		if (conf.animate != undefined){			
+			this.props.actions.setAnimatePause(!conf.animate)
+		}
+		if (conf.animateReverse != undefined){			
+			this.props.actions.setAnimateReverse(conf.animateReverse)
+		}
+
+
+		if (conf.controlVisible != undefined){
+			this.setState({controlVisible:conf.controlVisible})
+		}
+		if (conf.fpsVisible != undefined){
+			this.setState({fpsVisible:conf.fpsVisible})
+		}
+
 	}
 	
 
@@ -153,6 +238,11 @@ class App extends Container<any,any> {
 		if (vs.zoom == undefined || vs.zoom < 0){
 			vs.zoom = pv.zoom
 		}
+
+		if (vs.duration != undefined && vs.duration > 0){// set animation!
+			// umm
+		}
+
 //		console.log("SetViewport",pv)
 
 		const vp  =	{
@@ -411,9 +501,9 @@ class App extends Container<any,any> {
 		// make zoom level 20!
 //		let pv = this.props.viewport
 //		pv.maxZoom = 20
-		this.props.actions.setViewport({maxZoom:20, minZoom:1})
-		const { setNoLoop } = this.props.actions
-		setNoLoop(true);
+		this.props.actions.setViewport({maxZoom:30, minZoom:1})
+//		const { setNoLoop } = this.props.actions
+//		setNoLoop(true); // no loop on time end.
 	}
 
 	render () {
@@ -598,7 +688,7 @@ class App extends Container<any,any> {
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
-					visible={true}
+					visible={this.state.mapVisible}
 					viewport={viewport}
 					mapboxApiAccessToken={this.state.mapbox_token}
 					mapboxAddLayerValue={null}
@@ -606,17 +696,26 @@ class App extends Container<any,any> {
 					layers={layers}
 				/>
 				: <LoadingIcon loading={true} />
-
+		const controller  = 
+			(this.state.controlVisible?
+				<Controller {...(props as any)}
+				deleteMovebase={this.deleteMovebase.bind(this)}
+				getMoveDataChecked={this.getMoveDataChecked.bind(this)}
+				getMoveOptionChecked={this.getMoveOptionChecked.bind(this)}
+				getDepotOptionChecked={this.getDepotOptionChecked.bind(this)}
+				getOptionChangeChecked={this.getOptionChangeChecked.bind(this)}
+				/>
+				:<div />
+			)
+		const fpsdisp =
+				(this.state.fpsVisible?
+					<FpsDisplay />
+				 :<div />
+				)
 		return (
 			<div>
 				<TopTextLayer labelText={labelText} labelStyle={labelStyle}/>
-				<Controller {...(props as any)}
-					deleteMovebase={this.deleteMovebase.bind(this)}
-					getMoveDataChecked={this.getMoveDataChecked.bind(this)}
-					getMoveOptionChecked={this.getMoveOptionChecked.bind(this)}
-					getDepotOptionChecked={this.getDepotOptionChecked.bind(this)}
-					getOptionChangeChecked={this.getOptionChangeChecked.bind(this)}
-				/>
+				{controller}
 				<div className='harmovis_area'>
 					{visLayer}
 				</div>
@@ -631,8 +730,7 @@ class App extends Container<any,any> {
 						}
 					</g>
 				</svg>
-
-				<FpsDisplay />
+				{fpsdisp}
 				<div style={{
 						width: '100%',
 						position: 'absolute',

@@ -268,19 +268,37 @@ function startRecivedData() {
 
     socket.on('topLabelInfo', (payload: string) =>{
         console.log("Receive LabelInfo!:"+payload)
-        const data = JSON.parse(payload)
+        try{
+            const data = JSON.parse(payload)
         // we have to check CSS! (using validator) here
 
-        const labelInfo:LabelInfo = {
-            label: xssFilter.process(data.label) as string,
-            style: data.style
+            const labelInfo:LabelInfo = {
+             label: xssFilter.process(data.label) as string,
+             style: data.style
+         }
+         worker.postMessage({
+             type: 'RECEIVED_LABEL_INFO',
+             payload: labelInfo
+         } as SocketMessage<LabelInfo> );
+        }catch (error){
+            console.log("Json parse error on label:",error)
         }
-        worker.postMessage({
-            type: 'RECEIVED_LABEL_INFO',
-            payload: labelInfo
-        } as SocketMessage<LabelInfo> );
     })
 
+    
+    socket.on('harmovis', (payload: string) =>{
+        console.log("Receive HarmoVIS:"+payload)
+        try{
+            const data = JSON.parse(payload)
+            const conf = JSON.parse(data.confJson)
+            worker.postMessage({
+                type: 'RECEIVED_HARMOVIS_CONF',
+                payload: conf
+            } as SocketMessage<any> );
+        }catch(error){
+            console.log("Harmovis Msg Error:",error)
+        }
+    })
     
 
 }

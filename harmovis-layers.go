@@ -369,6 +369,16 @@ func supplyGeoCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 
 		}
 
+	case "HarmoVIS":
+		cms := &geo.HarmoVIS{}
+		err := proto.Unmarshal(sp.Cdata.Entity, cms)
+		if err == nil {
+			jsonBytes, _ := json.Marshal(cms)
+			mu.Lock()
+			ioserv.BroadcastToAll("harmovis", string(jsonBytes))
+			mu.Unlock()
+
+		}
 	}
 
 }

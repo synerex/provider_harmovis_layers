@@ -87,6 +87,8 @@ github.com/synerex/proto_geography v0.4.2 h1:Ejv319X2FhWhZd54dGQYWmxBQoew4s0wjav
 github.com/synerex/proto_geography v0.4.2/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_geography v0.5.0 h1:P0wIGNYWFMhQFDKZWNjNP8wrT7ICI73zFN2R7lQFD68=
 github.com/synerex/proto_geography v0.5.0/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_geography v0.5.1 h1:lgesLWpybY+KCtJi5Qr6Qbs3ppOUSay8XgH1RUAFH40=
+github.com/synerex/proto_geography v0.5.1/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
 github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=
@@ -150,9 +152,13 @@ golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 h1:OjiUf46hAmXblsZdnoSXsEUSK
 golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200610111108-226ff32320da h1:bGb80FudwxpeucJUjPYJXuJ8Hk91vNtfvrymzwiei38=
 golang.org/x/sys v0.0.0-20200610111108-226ff32320da/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 h1:ogLJMz+qpzav7lGMh10LMvAkM/fAoGlaiiHYiFYdm80=
+golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
+golang.org/x/text v0.3.3 h1:cokOdA+Jmi5PJGXLlLllQSgYigAEfHXJAERHVMaCc2k=
+golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190114222345-bf090417da8b/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190226205152-f727befe758c/go.mod h1:9Yl7xja0Znq3iFh3HoIrodX9oNMXvdceNzlUR8zjMvY=
@@ -179,6 +185,8 @@ google.golang.org/genproto v0.0.0-20200611194920-44ba362f84c1 h1:rRk0Nk0YJuu8qID
 google.golang.org/genproto v0.0.0-20200611194920-44ba362f84c1/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11 h1:II66Di7x1uAfKBfe3OchemS7pUg9ahSr7qAP3bD0+Mo=
 google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
+google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088 h1:XXo4PvhJkaWYIkwn7bX7mcdB8RdcOvn12HbaUUAwX3E=
+google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.23.1/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
