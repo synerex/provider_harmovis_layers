@@ -137,7 +137,7 @@ class App extends Container<any,any> {
 		const mbase = {
 //			departuretime: 1592717000, // 2020/06/21
 //			arrivaltime:   1592729000,
-			id: 1000000,
+			mid: 1000000,
 			operation:[] as any[],
 		}
 		const nowDateTime = Math.floor( new Date().getTime()/1000.0)
@@ -268,18 +268,18 @@ class App extends Container<any,any> {
 		let  setMovesbase = movesbase // (need copy!?)
 		let noDataFlag = true
 		for (const mbase of setMovesbase ){
-			if (mbase.id == meshBlock.id){
+			if (mbase.mid == meshBlock.id){
 				mbase.operation.push({
 					elapsedtime: meshBlock.timestamp,
 					meshItems: meshBlock.meshItems,
 				})
-				noDataFlag = true
+				noDataFlag = false
 				break;
 			}
 		}
 		if (noDataFlag){
 			setMovesbase.push({
-				id: meshBlock.id,
+				mid: meshBlock.id, // meshID
 				operation: [{
 					elapsedtime: meshBlock.timestamp,
 					meshItems: meshBlock.meshItems,	

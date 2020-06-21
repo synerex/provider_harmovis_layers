@@ -35,10 +35,11 @@ export default class MeshLayer extends CompositeLayer<MeshLayerProps> {
         return []
     }
 //    console.log("dt",meshData[0].meshItems)
+    const allItems = meshData.map((d:any)=>d.meshItems).flat()
 
     const layerProps = {
         id: this.props.id+'-mesh-layer',
-        data: meshData[0].meshItems,
+        data: allItems, 
         extruded: mesh3D,
         pickable: true,
         diskResolution: meshPolyNum,
@@ -47,14 +48,9 @@ export default class MeshLayer extends CompositeLayer<MeshLayerProps> {
         wireframe: meshWire,
         elevationScale: meshHeightRatio,
         getPosition: (d: any) => d.pos,
-        getFillColor: (d: any) => {
-                return d.col
-        },
+        getFillColor: (d: any) => d.col,
         getLineColor: [128, 128, 128,200],
-        getElevation: (d: any) => d.val,
-        onHover: (d: any) => {
-            return `value:${d.val}`;
-        }
+        getElevation: (d: any) => d.val
     }
 
     return [
