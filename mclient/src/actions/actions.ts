@@ -47,3 +47,16 @@ export const setScatterInfo = actionCreator('SET_SCATTER_INFO');
 
 // label
 export const setTopLabelInfo = actionCreator<LabelInfo>('SET_LABEL_INFO');
+
+// meshLayer
+export const setMeshVisible = actionCreator<boolean>(types.SET_MESH_VISIBLE)
+export const setMesh3D = actionCreator<boolean>(types.SET_MESH_3D)
+export const setMeshWire = actionCreator<boolean>(types.SET_MESH_WIRE)
+export const setMeshRadius = actionCreator<number>(types.SET_MESH_RADIUS)
+export const setMeshHeight = actionCreator<number>(types.SET_MESH_HEIGHT)
+export const setMeshPolyNum = actionCreator<number>(types.SET_MESH_POLYNUM)
+export const setMeshAngle = actionCreator<number>(types.SET_MESH_ANGLE)
+
+// mapLayer
+export const setMapVisible = actionCreator<boolean>(types.SET_MAP_VISIBLE)
+export const setAgentColor = actionCreator<number[]>(types.SET_AGENT_COLOR)

@@ -4,7 +4,7 @@ import { GridType } from '../constants/MapSettings'
 
 interface HeatmapLayerProps extends LayerProps {
   type: GridType
-  movedData: MovedData[]
+  movedData: any[]
   size: number
   height: number
   extruded: boolean
@@ -16,6 +16,12 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
 
   renderLayers () {
     const { movedData, type, size, height, visible, extruded } = this.props
+    const moveData = movedData.filter((b) => b.speed ) as any[]
+//    console.log("Heatmap",movedData)
+    if (moveData.length == 0 ){
+      return []
+    }
+
     if (type === GridType.Hexagon) {
       return [
         new HexagonLayer({
@@ -24,7 +30,7 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
             opacity: 0.1,
             elevationRange: [0,100],
             elevationScale: height,
-            data: movedData,
+            data: moveData,
             radius: size,
             getPosition: (d: MovedData) => [d.position[0] as number, d.position[1] as number]
           })
@@ -38,7 +44,7 @@ export default class PolygonIconLayer extends CompositeLayer<HeatmapLayerProps> 
             elevationRange: [0,100],
             elevationScale: height,
             cellSize: size,
-            data: movedData,
+            data: moveData,
             getPosition: (d: MovedData) => [d.position[0] as number, d.position[1] as number]
           })
       ]

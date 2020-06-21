@@ -13,6 +13,8 @@ import ToggleHeatMap from '../containers/ToggleHeatMap'
 import Toggle3DHeatmap from '../containers/Toggle3DHeatmap'
 import HeatmapTypeSelection from '../containers/HeatmapSelection'
 import BargraphController from './BarGraphController'
+import MeshLayerController from './MeshLayerController'
+import MapLayerController from './MapLayerController'
 
 // for clearArc / Scatter
 import * as actions from '../actions/actions'
@@ -56,7 +58,8 @@ interface ControllerProps {
   getDepotOptionChecked: any ,
   getOptionChangeChecked: any, 
   inputFileName: any, 
-  viewport: any 
+  viewport: any ,
+  movesbase: any
 }
 
 interface ContState {
@@ -84,6 +87,9 @@ export default class Controller extends React.Component<ControllerProps, ContSta
   }
 
   deleteArcScatterbase(){    
+    // show current viewport and objs.
+    console.log("viewport:",this.props.viewport)
+    console.log("movesbase:",this.props.movesbase)
     store.dispatch(actions.clearArcData())
     store.dispatch(actions.clearScatterData())
     store.dispatch(actions.addLineData([]))// clear line
@@ -244,7 +250,12 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               </div>
             </li>
           </ul>
+              
           <div className="option-list"> 
+            <label htmlFor="item0">マップ表示設定</label>
+            <input type="checkbox" id="item0"></input> 
+            <MapLayerController actions={actions} viewport={viewport}/>
+
             <label htmlFor="item1">ヒートマップの設定</label>
             <input type="checkbox" id="item1"></input> 
             <ul>
@@ -268,6 +279,10 @@ export default class Controller extends React.Component<ControllerProps, ContSta
             <label htmlFor="item2">棒グラフの設定</label>
             <input type="checkbox" id="item2"></input> 
             <BargraphController />
+
+            <label htmlFor="item3">メッシュの設定</label>
+            <input type="checkbox" id="item3"></input> 
+            <MeshLayerController />
          </div>
         </div>
       </div>

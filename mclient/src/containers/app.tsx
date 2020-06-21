@@ -15,10 +15,12 @@ import {
 import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from '@deck.gl/layers'
 
 import BarLayer from './BarLayer'
+import MeshLayer from './MeshLayer'
 import BarGraphInfoCard from '../components/BarGraphInfoCard'
 import { selectBarGraph, removeBallonInfo, appendBallonInfo, updateBallonInfo } from '../actions/actions'
 import store from '../store'
 import { BarData } from '../constants/bargraph'
+import { MeshItem } from '../constants/meshdata'
 import { Line } from '../constants/line'
 import { Arc, Scatter } from '../constants/geoObjects'
 
@@ -90,16 +92,20 @@ class App extends Container<any,any> {
 		setSecPerHour(3600)
 		setLeading(3)
 		setTrailing(3)
+
+
+
+
 		this.state = {
 			moveDataVisible: true,
 			moveOptionVisible: false,
 			depotOptionVisible: false,
-			heatmapVisible: false,
-			mapVisible: true,
 			controlVisible: true,
 			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
+			flyToFlag: false,
+			
 //			geojson: null,
 //			lines: [],
 /*			viewState: {
@@ -115,16 +121,57 @@ class App extends Container<any,any> {
 			popup: [0, 0, '']
 		}
 
+		// just initial settings for lines.
+
+
 //		this._onViewStateChange = this._onViewStateChange.bind(this)
+	}
+
+	setSampleMesh(){
+				// math
+		// nagoya lat, lon = 35.181433 136.906421
+		const {lat, lon} = {lat:35.181433, lon:136.906421} 
+		const msize = 0.01;
+
+
+		const mbase = {
+//			departuretime: 1592717000, // 2020/06/21
+//			arrivaltime:   1592729000,
+			id: 1000000,
+			operation:[] as any[],
+		}
+		const nowDateTime = Math.floor( new Date().getTime()/1000.0)
+
+		for (let i = 0; i< 200; i ++){
+			mbase.operation[i]={
+				elapsedtime: nowDateTime+i,
+				meshItems: [] as MeshItem[]
+			}
+			for (let xx = 0; xx< 40; xx ++){
+				for (let yy = 0; yy< 30; yy ++){
+					const v = xx*5+yy*5+1
+					mbase.operation[i].meshItems.push({
+						pos:[lon+msize*xx,lat+msize*yy],
+						col: [48,128,(v/2+i*2)%256,190],
+						val: v+i*20
+					})
+				}
+			}
+		}
+
+//		store.dispatch(actions.toggleHeatmap(false));
+//		console.log("mbase:",mbase)
+		this.props.actions.updateMovesBase([mbase])
+
 	}
 
 	resolveHarmoVISConf(conf: any){
 		console.log("Resolve HarmoVISConf",conf)
-		if (conf.setNoLoop != undefined){
-			this.props.actions.setNoLoop(conf.setNoLoop);
+		if (conf.noLoop != undefined){
+			this.props.actions.setNoLoop(conf.noLoop);
 		}
 		if (conf.mapVisible != undefined){
-			this.setState({mapVisible: conf.mapVisible});
+			store.dispatch(actions.setMapVisible(conf.mapVisible))
 		}
 		if (conf.moveDataVisible != undefined){
 			this.setState({moveDataVisible: conf.moveDataVisible});
@@ -196,6 +243,50 @@ class App extends Container<any,any> {
 			this.setState({fpsVisible:conf.fpsVisible})
 		}
 
+		// new Flyto for HarmoVIS 1.6.11
+		if (conf.flyToFlag != undefined){
+			this.setState({flyToFlag: conf.flyToFlag})			
+		}
+
+		if (conf.initialViewChange != undefined){
+			this.props.actions.setInitialViewChange(conf.initialViewChange)
+		}
+
+		if (conf.addMesh != undefined) {
+			this.addMeshData(conf.addMesh)
+		}
+
+	}
+
+	/*
+		meshBlock:
+		  { id:number, timestamp, meshItems: MeshItems[]}
+	*/
+
+	addMeshData(meshBlock:any){
+		const { actions, movesbase } = this.props
+		let  setMovesbase = movesbase // (need copy!?)
+		let noDataFlag = true
+		for (const mbase of setMovesbase ){
+			if (mbase.id == meshBlock.id){
+				mbase.operation.push({
+					elapsedtime: meshBlock.timestamp,
+					meshItems: meshBlock.meshItems,
+				})
+				noDataFlag = true
+				break;
+			}
+		}
+		if (noDataFlag){
+			setMovesbase.push({
+				id: meshBlock.id,
+				operation: [{
+					elapsedtime: meshBlock.timestamp,
+					meshItems: meshBlock.meshItems,	
+				}]
+			})
+		}
+		actions.updateMovesBase(setMovesbase);	
 	}
 	
 
@@ -309,40 +400,53 @@ class App extends Container<any,any> {
 	}
 
 	getAgents (dt : AgentData) { // receive Agents information from worker thread.
-		const { actions, movesbase } = this.props
+		const { actions, movesbase, agentColor } = this.props
 		const agents = dt.dt.agents
 		const time = dt.ts // set time as now. (If data have time, ..)
 		let  setMovesbase = []
 
-		if (movesbase.length == 0) {
-			for (let i = 0, len = agents.length; i < len; i++) {
+		const agCount = agents.length
+
+			// there might be different agent data on here.
+			// we need to update
+			// check there is already agent there.
+			let agn = 0;
+			setMovesbase = movesbase
+			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
+				if (movesbase[i].id === undefined)  // not agent data
+					continue;
+				if (movesbase[i].operation === undefined)  // not moves data
+					continue;
+				while (movesbase[i].id != agn && agn < agCount ) agn++;
+
+				if( agn < agCount){ // update(add operation for each agent)
+					movesbase[i].arrivaltime = time
+					movesbase[i].operation.push({
+						elapsedtime: time,
+						position: [agents[agn].point[0], agents[agn].point[1], 0],
+						angle: 0,
+						color: (agents[agn].color)?agents[agn].color:agentColor,
+						speed: 0.5
+					})
+					agn++
+				}
+			}
+			for (;agn < agCount; agn++){
 				setMovesbase.push({
 					mtype: 0,
-					id: i,
+					id: agn,
 					departuretime: time,
 					arrivaltime: time,
 					operation: [{
 						elapsedtime: time,
-						position: [agents[i].point[0], agents[i].point[1], 0],
+						position: [agents[agn].point[0], agents[agn].point[1], 0],
 						angle: 0,
 						speed: 0.5,
-						color: [100,100,0]
+						color: (agents[agn].color)?agents[agn].color:agentColor,
 					}]
 				})
 			}
-		} else {
-			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
-				movesbase[i].arrivaltime = time
-				movesbase[i].operation.push({
-					elapsedtime: time,
-					position: [agents[i].point[0], agents[i].point[1], 0],
-					angle: 0,
-					color: [100,100,0],
-					speed: 0.5
-				})
-			}
-			setMovesbase = movesbase
-		}
+		
 		actions.updateMovesBase(setMovesbase)
 	}
 
@@ -416,10 +520,10 @@ class App extends Container<any,any> {
 
 	deleteMovebase (maxKeepSecond :any) {
 		const { actions, animatePause, movesbase, settime } = this.props
-		const movesbasedata = [...movesbase]
+//		const movesbasedata = [...movesbase]
 		const setMovesbase :any[] = []
 		let dataModify = false
-		const compareTime = settime - maxKeepSecond
+//		const compareTime = settime - maxKeepSecond
 
 		/*
 		for (let i = 0, lengthi = movesbasedata.length; i < lengthi; i += 1) {
@@ -501,9 +605,10 @@ class App extends Container<any,any> {
 		// make zoom level 20!
 //		let pv = this.props.viewport
 //		pv.maxZoom = 20
-		this.props.actions.setViewport({maxZoom:30, minZoom:1})
+		this.props.actions.setViewport({maxZoom:30, minZoom:1, maxPitch:85})
 //		const { setNoLoop } = this.props.actions
 //		setNoLoop(true); // no loop on time end.
+//		this.setSampleMesh()
 	}
 
 	render () {
@@ -512,7 +617,9 @@ class App extends Container<any,any> {
 			arcVisible, scatterVisible, scatterFill, scatterMode, 
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
 			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
-			labelText, labelStyle
+			labelText, labelStyle,
+			meshVisible, mesh3D, meshWire, meshRadius, meshHeight, meshPolyNum, meshAngle,
+			mapVisible
 		} = props
 		// 	const { movesFileName } = inputFileName;
 //		const optionVisible = false
@@ -553,6 +660,23 @@ class App extends Container<any,any> {
 				store.dispatch(removeBallonInfo(id));
 			}
 		}))
+
+		if (meshVisible) {
+			layers.push(new MeshLayer({
+				id: 'mesh-layer',
+				data: movedData,
+				movesbase: movesbase,
+				currentTime: settime,
+				mesh3D: mesh3D, // use same as heatmap
+				meshPolyNum: meshPolyNum,
+				meshAngle: meshAngle,
+				meshWire: meshWire, // 
+				meshRadius: meshRadius,            // 
+				meshHeightRatio: meshHeight, // using same of heatmap
+			}))
+		}
+
+
 
 		if (geojson != null) {
 //			console.log("geojson rendering"+this.state.geojson.length)
@@ -688,12 +812,13 @@ class App extends Container<any,any> {
 		const visLayer =
 			(this.state.mapbox_token.length > 0) ?
 				<HarmoVisLayers 
-					visible={this.state.mapVisible}
+					visible={mapVisible}
 					viewport={viewport}
 					mapboxApiAccessToken={this.state.mapbox_token}
 					mapboxAddLayerValue={null}
 					actions={actions}
 					layers={layers}
+					flyto={this.state.flyToFlag}
 				/>
 				: <LoadingIcon loading={true} />
 		const controller  = 

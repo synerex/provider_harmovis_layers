@@ -4,6 +4,8 @@ import heatmapSettings from './reducer/heatmapSettings'
 import barGraphSettings from './reducer/barGraphSettings'
 import {lineSettings, arcSettings, scatterSettings, topTextReducer, geoJsonSettings
 } from './reducer/layerSettings'
+import meshLayerSettings from './reducer/meshLayerSettings'
+import mapSettings from './reducer/mapSettings'
 import createSagaMiddleware from 'redux-saga'
 import informationBalloon from './reducer/informationBalloon'
 //import timelapseSettings from './reducer/timelapseSettings'
@@ -19,6 +21,8 @@ const store = createStore(
     geoJsonSettings,
     arcSettings,
     scatterSettings,
+    meshLayerSettings,
+    mapSettings,
     topTextReducer,
 //  timelapseSettings
   }),
