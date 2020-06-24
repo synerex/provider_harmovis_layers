@@ -255,6 +255,27 @@ class App extends Container<any,any> {
 		if (conf.addMesh != undefined) {
 			this.addMeshData(conf.addMesh)
 		}
+		if (conf.meshVisible != undefined) {
+			store.dispatch(actions.setMeshVisible(conf.meshVisible))
+		}
+		if (conf.mesh3D != undefined) {
+			store.dispatch(actions.setMesh3D(conf.mesh3D))
+		}
+		if (conf.meshWire != undefined) {
+			store.dispatch(actions.setMeshWire(conf.meshWire))
+		}
+		if (conf.meshRadius != undefined) {
+			store.dispatch(actions.setMeshRadius(conf.meshRadius))
+		}
+		if (conf.meshHeight != undefined) {
+			store.dispatch(actions.setMeshHeight(conf.meshHeight))
+		}
+		if (conf.setMeshPolyNum != undefined) {
+			store.dispatch(actions.setMeshPolyNum(conf.setMeshPolyNum))
+		}
+		if (conf.meshAngle != undefined) {
+			store.dispatch(actions.setMeshAngle(conf.meshAngle))
+		}
 
 	}
 
