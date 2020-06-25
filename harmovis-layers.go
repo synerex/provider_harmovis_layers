@@ -395,19 +395,51 @@ func subscribeGeoSupply(client *sxutil.SXServiceClient) {
 }
 
 func supplyPAgentCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
+	//	log.Printf("Agent: %v", *sp)
 	switch sp.SupplyName {
 	case "Agents":
 		agents := &pagent.PAgents{}
 		err := proto.Unmarshal(sp.Cdata.Entity, agents)
+		//		log.Printf("Agent: %v", *agents)
 		if err == nil {
 			seconds := sp.Ts.GetSeconds()
 			nanos := sp.Ts.GetNanos()
-			jsonBytes, _ := json.Marshal(agents)
-			jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}", seconds, int(nanos/1000000), string(jsonBytes))
-			//				log.Printf("Lines: %v", jstr)
-			mu.Lock()
-			ioserv.BroadcastToAll("agents", jstr)
-			mu.Unlock()
+
+			jsonBytes, err := json.Marshal(agents)
+			if err == nil {
+				jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}", seconds, int(nanos/1000000), string(jsonBytes))
+				log.Printf("Lines: %v", jstr)
+				mu.Lock()
+				ioserv.BroadcastToAll("agents", jstr)
+				mu.Unlock()
+			} else {
+				log.Printf("Invalid Agents! %v count %d", err, len(agents.Agents))
+				ags := make([]*pagent.PAgent, 0)
+				ct := 0
+				for i := 0; i < len(agents.Agents); i++ {
+					//					log.Printf("Agent: %d, %f, %f , %v", agents.Agents[i].Id, agents.Agents[i].Point[0], agents.Agents[i].Point[1], agents.Agents[i])
+					_, err2 := json.Marshal(agents.Agents[i])
+					if err2 == nil {
+						ags = append(ags, agents.Agents[i])
+						ct++
+					}
+				}
+				ag2 := &pagent.PAgents{
+					Agents: ags,
+				}
+				jsonBytes, err3 := json.Marshal(ag2)
+				if err3 == nil {
+					jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}", seconds, int(nanos/1000000), string(jsonBytes))
+					//				log.Printf("Lines: %v", jstr)
+					mu.Lock()
+					ioserv.BroadcastToAll("agents", jstr)
+					mu.Unlock()
+				} else {
+					log.Printf("Invalid Agents! %v again", err3)
+
+				}
+
+			}
 		}
 	}
 
