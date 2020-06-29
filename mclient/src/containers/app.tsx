@@ -447,7 +447,7 @@ class App extends Container<any,any> {
 						"": any
 					}
 				) => {
-				if(v.id === agent.id && v.mtype === 0) {
+				if(v.id === (agent.id || agn) && v.mtype === 0) {
 					v.operation.push({
 						elapsedtime: time,
 						position: [agent.point[0], agent.point[1], 0],
