@@ -104,7 +104,6 @@ class App extends Container<any,any> {
 			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
-			flyToFlag: false,
 			
 //			geojson: null,
 //			lines: [],
@@ -244,9 +243,10 @@ class App extends Container<any,any> {
 		}
 
 		// new Flyto for HarmoVIS 1.6.11
-		if (conf.flyToFlag != undefined){
-			this.setState({flyToFlag: conf.flyToFlag})			
-		}
+		// now undefined in Harmoware-VIS 1.6.15
+//		if (conf.flyToFlag != undefined){
+//			this.setState({flyToFlag: conf.flyToFlag})			
+//		}
 
 		if (conf.initialViewChange != undefined){
 			this.props.actions.setInitialViewChange(conf.initialViewChange)
@@ -329,12 +329,29 @@ class App extends Container<any,any> {
 	getBearing (data :any ) {
 //		console.log('Bearing:' + data)
 //		console.log(this.props.actions)
-		this.props.actions.setViewport({bearing:data})
+		let vp:any = { bearing: data.bearing}
+		if (data.duration){
+			if (data.duration <0 ){
+				vp.transitionDuration= "auto"
+			}else{
+				vp.transitionDuration= Math.floor(data.duration*1000)  // sec -> msec conversion
+			}
+		}
+		this.props.actions.setViewport(vp)
 	}
 	
 	getPitch (data :any) {
 //		console.log('Pitch:' + data)
-		this.props.actions.setViewport({pitch:data})
+		let vp:any = { pitch: data.pitch}
+
+		if (data.duration){
+			if (data.duration <0 ){
+				vp.transitionDuration= "auto"
+			}else{
+				vp.transitionDuration= Math.floor(data.duration*1000)  // sec -> msec conversion
+			}
+		}
+		this.props.actions.setViewport(vp)
 	}
 
 
@@ -350,20 +367,24 @@ class App extends Container<any,any> {
 		if (vs.zoom == undefined || vs.zoom < 0){
 			vs.zoom = pv.zoom
 		}
+		
 
-		if (vs.duration != undefined && vs.duration > 0){// set animation!
-			// umm
-		}
-
-//		console.log("SetViewport",pv)
-
-		const vp  =	{
+		let vp:any  =	{
 			latitude: vs.lat,
 			longitude: vs.lon,
 			zoom: vs.zoom,
 			pitch: vs.pitch
 		}
 
+		if (vs.duration != undefined ){
+			if( vs.duration > 0){// set animation!
+				vp.transitionDuration = Math.floor(data.duration*1000)
+			}else{
+				vp.transitionDuration = "auto"
+			}			
+		}
+
+//		console.log("SetViewport",pv)
 	// Hook cannot be used under class...
 //		const dispatch = useDispatch()
 //		dispatch(this.props.actions.setViewport(vp))
@@ -839,7 +860,6 @@ class App extends Container<any,any> {
 					mapboxAddLayerValue={null}
 					actions={actions}
 					layers={layers}
-					flyto={this.state.flyToFlag}
 				/>
 				: <LoadingIcon loading={true} />
 		const controller  = 

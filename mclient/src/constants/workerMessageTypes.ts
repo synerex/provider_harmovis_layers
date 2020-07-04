@@ -26,10 +26,10 @@ export const isGeoJsonMsg = (msg: WorkerMessage): msg is SocketMessage<string> =
 export const isMapboxToken = (msg: WorkerMessage): msg is SocketMessage<string> => {
     return msg.type === 'RECEIVED_MAPBOX_TOKEN'
 }
-export const isPitchMsg = (msg: WorkerMessage): msg is SocketMessage<number> => {
+export const isPitchMsg = (msg: WorkerMessage): msg is SocketMessage<any> => {
     return msg.type === 'RECEIVED_PITCH'
 }
-export const isBearingMsg = (msg: WorkerMessage): msg is SocketMessage<number> => {
+export const isBearingMsg = (msg: WorkerMessage): msg is SocketMessage<any> => {
     return msg.type === 'RECEIVED_BEARING'
 }
 export const isClearMovesMsg = (msg: WorkerMessage): msg is SocketMessage<string> => {

@@ -148,26 +148,21 @@ function startRecivedData() {
     })
     socket.on('pitch', (str: string) =>{
 //        console.log('Pitch:' + str)
-        let payload:number =JSON.parse(str).pitch;
-        if (payload == undefined ){
-            payload = 0
-        }
+        let payload:any = JSON.parse(str)
         worker.postMessage({
             type: 'RECEIVED_PITCH',
             payload
-        } as SocketMessage<number> );
+        } as SocketMessage<any> );
     })
     
     socket.on('bearing', (str: string) =>{
 //        console.log('Bearing:' + payload)
-        let payload:number =JSON.parse(str).bearing;
-        if (payload == undefined ){
-            payload = 0
-        }
+//        let payload:number =JSON.parse(str).bearing;
+        let payload:any = JSON.parse(str)
         worker.postMessage({
             type: 'RECEIVED_BEARING',
             payload
-        } as SocketMessage<number> );
+        } as SocketMessage<any> );
     })
     
     
