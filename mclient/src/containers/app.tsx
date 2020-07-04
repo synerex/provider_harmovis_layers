@@ -445,49 +445,56 @@ class App extends Container<any,any> {
 		const { actions, movesbase, agentColor } = this.props
 		const agents = dt.dt.agents
 		const time = dt.ts // set time as now. (If data have time, ..)
-		let  setMovesbase = []
+		let  setMovesbase = movesbase
 
-		const agCount = agents.length
-
-			// there might be different agent data on here.
-			// we need to update
-			// check there is already agent there.
-			let agn = 0;
-			setMovesbase = movesbase
-			for (let i = 0, lengthi = movesbase.length; i < lengthi; i ++) {
-				if (movesbase[i].id === undefined)  // not agent data
-					continue;
-				if (movesbase[i].operation === undefined)  // not moves data
-					continue;
-				while (movesbase[i].id != agn && agn < agCount ) agn++;
-
-				if( agn < agCount){ // update(add operation for each agent)
-					movesbase[i].arrivaltime = time
-					movesbase[i].operation.push({
+		agents.forEach((agent, agn) => {
+			let flag = false;
+			setMovesbase.forEach(
+				(
+					v: {
+						id: number;
+						mtype: number;
+						departuretime: number;
+						arrivaltime: number;
+						operation: [
+							{
+								elapsedtime: number;
+								position: number[];
+								angle: number;
+								color: any;
+								speed: number;
+							}
+						];
+						"": any
+					}
+				) => {
+				if(v.id === (agent.id || agn) && v.mtype === 0) {
+					v.operation.push({
 						elapsedtime: time,
-						position: [agents[agn].point[0], agents[agn].point[1], 0],
+						position: [agent.point[0], agent.point[1], 0],
 						angle: 0,
-						color: (agents[agn].color)?agents[agn].color:agentColor,
+						color: agent.color || agentColor,
 						speed: 0.5
-					})
-					agn++
+					});
+					flag = true;
 				}
-			}
-			for (;agn < agCount; agn++){
+			});
+			if (!flag) {
 				setMovesbase.push({
 					mtype: 0,
-					id: agn,
+					id: agent.id || agn,
 					departuretime: time,
 					arrivaltime: time,
 					operation: [{
 						elapsedtime: time,
-						position: [agents[agn].point[0], agents[agn].point[1], 0],
+						position: [agent.point[0], agent.point[1], 0],
 						angle: 0,
 						speed: 0.5,
-						color: (agents[agn].color)?agents[agn].color:agentColor,
+						color: agent.color || agentColor,
 					}]
 				})
 			}
+		});
 		
 		actions.updateMovesBase(setMovesbase)
 	}
