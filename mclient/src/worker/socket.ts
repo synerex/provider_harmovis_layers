@@ -126,7 +126,6 @@ function color2array(col:number) : number[] {
 
 
 function startRecivedData() {
-    const xssFilter = new xss.FilterXSS({})
 
     socket.on('bargraphs', (str: string) => {
         console.log('Bargraphs:' + str.length)
@@ -267,8 +266,8 @@ function startRecivedData() {
             const data = JSON.parse(payload)
         // we have to check CSS! (using validator) here
 
-            const labelInfo:LabelInfo = {
-             label: xssFilter.process(data.label) as string,
+            const labelInfo:LabelInfo = { // 
+             label: xss(data.label as string, {}) as string,
              style: data.style
          }
          worker.postMessage({
