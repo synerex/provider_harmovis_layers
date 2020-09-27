@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import xss from 'xss';
 
+import { PFlowData } from '../constants/pflow';
 import { BarData } from '../constants/bargraph';
 import { AgentData } from '../constants/agent';
 import { Line } from '../constants/line';
@@ -126,6 +127,15 @@ function color2array(col:number) : number[] {
 
 
 function startRecivedData() {
+
+    socket.on('pflow', (str: string) => {
+        const payload: PFlowData = JSON.parse(str);
+//        console.log('Agents:' + str.length)
+        worker.postMessage({
+            type: 'RECEIVED_PFLOW',
+            payload
+        } as SocketMessage<PFlowData>)
+    })
 
     socket.on('bargraphs', (str: string) => {
         console.log('Bargraphs:' + str.length)

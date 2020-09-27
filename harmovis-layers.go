@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	pflow "github.com/UCLabNU/proto_pflow"
 	"github.com/golang/protobuf/proto"
 	gosocketio "github.com/mtfelian/golang-socketio"
 	"github.com/mtfelian/golang-socketio/transport"
@@ -455,6 +456,37 @@ func subscribePAgentSupply(client *sxutil.SXServiceClient) {
 	}
 }
 
+func supplyPFlowCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
+	pflow := &pflow.PFlow{}
+	err := proto.Unmarshal(sp.Cdata.Entity, pflow)
+	if err == nil {
+		jsondata, err := json.Marshal(*pflow)
+		//		fmt.Println("rcb",mm.GetJson())
+		if err == nil {
+			mu.Lock()
+			ioserv.BroadcastToAll("pflow", string(jsondata))
+			log.Printf("Bloadcast supplyPFlowCallback > %v\n", string(jsondata))
+			mu.Unlock()
+		} else {
+			log.Printf("Error in supplyPFlowCallback > json.Marshal\n")
+			log.Printf("%+v", err)
+		}
+	} else {
+		log.Printf("Error in supplyPFlowCallback > proto.Unmarshal\n")
+		log.Printf("%+v", err)
+	}
+}
+
+func subscribePFlowSupply(client *sxutil.SXServiceClient) {
+	for {
+		ctx := context.Background() //
+		err := client.SubscribeSupply(ctx, supplyPFlowCallback)
+		log.Printf("Error:Supply %s\n", err.Error())
+		// we need to restart
+		reconnectClient(client)
+	}
+}
+
 /*
 func supplyPTCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 //	pt := sp.GetArg_PTService()
@@ -521,12 +553,17 @@ func main() {
 	argJSON3 := fmt.Sprintf("{Client:Map:Geo}")
 	geo_client := sxutil.NewSXServiceClient(client, pbase.GEOGRAPHIC_SVC, argJSON3)
 
+	argJSON4 := fmt.Sprintf("{Client:Map:Pflow}")
+	pflow_client := sxutil.NewSXServiceClient(client, pbase.PEOPLE_FLOW_SVC, argJSON4)
+
 	wg.Add(1)
 	go subscribeRideSupply(rideClient)
 
 	go subscribePAgentSupply(pa_client)
 
 	go subscribeGeoSupply(geo_client)
+
+	go subscribePFlowSupply(pflow_client)
 
 	go monitorStatus() // keep status
 

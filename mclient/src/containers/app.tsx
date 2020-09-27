@@ -30,12 +30,13 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg
 	} from '../constants/workerMessageTypes'
 import  TopTextLayer  from '../components/TopTextLayer'
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
+import { PFlowData } from '../constants/pflow'
 //import layerSettings from '../reducer/layerSettings'
 
 class App extends Container<any,any> {
@@ -48,7 +49,9 @@ class App extends Container<any,any> {
 		const self = this;
 		worker.onmessage = (e) => {
 			const msg = e.data;
-			if (isBarGraphMsg(msg)) {
+			if (isPFlowMsg(msg)) {
+				self.getPflow(msg.payload)
+			} else if (isBarGraphMsg(msg)) {
 				self.getBargraph(msg.payload)
 			} else if (isAgentMsg(msg)) {
 				self.getAgents(msg.payload)
@@ -314,6 +317,24 @@ class App extends Container<any,any> {
 	bin2String (array :any) {
 		return String.fromCharCode.apply(String, array)
   	}
+
+	getPflow (data: PFlowData) {
+		console.log("Received PFlow:", data);
+		const { actions, movesbase } = this.props
+		const bars = data;
+		let  setMovesbase = [...movesbase]
+		
+		setMovesbase.push({
+			mtype: 0,
+			type: data.type,
+			id: data.id,
+			departuretime: data.start_time.second,
+			arrivaltime: data.end_time.second,
+			operation: data.operation,
+		} as Movesbase)
+
+		actions.updateMovesBase(setMovesbase);
+	}
 
 	getGeoJson (data :string) {
 		console.log('Geojson:' + data.length)

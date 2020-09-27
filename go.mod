@@ -3,6 +3,7 @@ module harmovis-layers
 go 1.13
 
 require (
+	github.com/UCLabNU/proto_pflow v0.0.1
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/mtfelian/golang-socketio v1.5.2
@@ -19,3 +20,5 @@ require (
 	golang.org/x/text v0.3.3 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 )
+
+replace github.com/synerex/synerex_proto v0.1.9 => github.com/nagata-yoshiteru/synerex_proto v0.1.10

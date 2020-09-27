@@ -1,3 +1,4 @@
+import { PFlowData } from "./pflow";
 import { AgentData } from "./agent";
 import { BarData } from "./bargraph";
 import { Line } from "./line";
@@ -11,6 +12,9 @@ export interface SocketMessage<T> extends WorkerMessage  {
     payload: T
 }
 
+export const isPFlowMsg = (msg: WorkerMessage): msg is SocketMessage<PFlowData> => {
+    return msg.type === 'RECEIVED_PFLOW'
+}
 export const isBarGraphMsg = (msg: WorkerMessage): msg is SocketMessage<BarData[]> => {
     return msg.type === 'RECEIVED_BAR_GRAPHS'
 }
@@ -62,7 +66,7 @@ export const isHarmoVISConfMsg = (msg: WorkerMessage): msg is SocketMessage<any>
 }
 
 
-export type SocketMsgTypes = 'RECEIVED_AGENT'| 'CONNECTED'| 'RECEIVED_MAPBOX_TOKEN'
+export type SocketMsgTypes = 'RECEIVED_PFLOW'| 'RECEIVED_AGENT'| 'CONNECTED'| 'RECEIVED_MAPBOX_TOKEN'
      | 'RECEIVED_BAR_GRAPHS'
      | 'RECEIVED_LINES'
      | 'RECEIVED_GEOJSON'
