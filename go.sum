@@ -2,6 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
+github.com/UCLabNU/proto_pflow v0.0.1 h1:5TAzFNHThq8bIFLCCzwmaK83rt2uGjXDmrhiZ9Ac2LU=
+github.com/UCLabNU/proto_pflow v0.0.1/go.mod h1:nGwxhwzmfrvIa+1GrGphU2GcfTDSrRujktm9eNFrCQE=
 github.com/bwmarrin/snowflake v0.3.0 h1:xm67bEhkKh6ij1790JB83OujPR5CzNe8QuQqAgISZN0=
 github.com/bwmarrin/snowflake v0.3.0/go.mod h1:NdZxfVWX+oR6y2K0o6qAYv6gIOP9rjG0/E9WsDpxqwE=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
@@ -47,6 +49,8 @@ github.com/mtfelian/golang-socketio v1.5.2 h1:XGR4ZdBvkdfHceTKE/PrDH3DEpPCpyjD/k
 github.com/mtfelian/golang-socketio v1.5.2/go.mod h1:ZRviig62J0W0M5/Qv0QpW4p2BkDhzhbeK+hi9Z6se6w=
 github.com/mtfelian/synced v1.0.0 h1:/D7ISn9Cq1EzZ/z316ySS9d0v1NaBSijVZBQeK261v8=
 github.com/mtfelian/synced v1.0.0/go.mod h1:9LrjNfrzokPgxRAEluvyoztApADeGGEwULm94BJxGkE=
+github.com/nagata-yoshiteru/synerex_proto v0.1.10 h1:4gQrr76Bat0T6NT6LCJZe6vpbsuIDEE5NSuGcUbnsmk=
+github.com/nagata-yoshiteru/synerex_proto v0.1.10/go.mod h1:lUHzAQw4NAT6YAULnyoTD/MRf7UiV84wcY2m7szJ4Mg=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/shirou/gopsutil v2.19.9+incompatible h1:IrPVlK4nfwW10DF7pW+7YJKws9NkgNzWozwwWv9FsgY=
