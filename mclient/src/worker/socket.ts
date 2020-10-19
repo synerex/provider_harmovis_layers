@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import xss from 'xss';
 
+import { PAreaData } from '../constants/parea';
 import { PFlowData } from '../constants/pflow';
 import { BarData } from '../constants/bargraph';
 import { AgentData } from '../constants/agent';
@@ -140,6 +141,15 @@ function color2array(col:number) : number[] {
 
 
 function startRecivedData() {
+
+    socket.on('parea', (str: string) => {
+        const payload: PAreaData = JSON.parse(str);
+//        console.log('Agents:' + str.length)
+        worker.postMessage({
+            type: 'RECEIVED_PAREA',
+            payload
+        } as SocketMessage<PAreaData>)
+    })
 
     socket.on('pflow', (str: string) => {
         const payload: PFlowData = JSON.parse(str);

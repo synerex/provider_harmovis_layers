@@ -11,6 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/synerex/proto_fleet v0.1.0
 	github.com/synerex/proto_geography v0.5.2
+	github.com/synerex/proto_pcounter v0.0.6
 	github.com/synerex/proto_people_agent v0.0.1
 	github.com/synerex/synerex_api v0.4.2
 	github.com/synerex/synerex_nodeapi v0.5.4 // indirect

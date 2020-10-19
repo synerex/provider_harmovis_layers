@@ -30,13 +30,14 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg, isAreasMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg, isAreasMsg, isPAreaMsg
 	} from '../constants/workerMessageTypes'
 import  TopTextLayer  from '../components/TopTextLayer'
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
 import { PFlowData, Operation } from '../constants/pflow'
+import { PAreaData } from '../constants/parea'
 //import layerSettings from '../reducer/layerSettings'
 
 class App extends Container<any,any> {
@@ -49,7 +50,9 @@ class App extends Container<any,any> {
 		const self = this;
 		worker.onmessage = (e) => {
 			const msg = e.data;
-			if (isPFlowMsg(msg)) {
+			if (isPAreaMsg(msg)) {
+				self.getPArea(msg.payload)
+			} else if(isPFlowMsg(msg)) {
 				self.getPflow(msg.payload)
 			} else if(isAreasMsg(msg)) {
 				this.setState({
@@ -341,6 +344,13 @@ class App extends Container<any,any> {
 		} as Movesbase)
 
 		actions.updateMovesBase(setMovesbase);
+	}
+
+	getPArea (data: PAreaData) {
+		console.log("Received PArea:", data);
+		const areaCount = new Map<string, number>();
+		data.acs.forEach(v => areaCount.set(v.areaName, v.count));
+		this.setState({ areaCount });
 	}
 
 	getGeoJson (data :string) {
@@ -699,13 +709,14 @@ class App extends Container<any,any> {
 			mapVisible
 		} = props
 
-		const areaCount = new Map<string, number>();
-		this.state.areas.forEach((area: any) => {
-			areaCount.set(area.name, 0);
-		});
-		movedData.forEach((mv: Operation) => {
-			areaCount.set(mv.area, areaCount.get(mv.area) ? areaCount.get(mv.area) + 1 : 1);
-		});
+		// const areaCount = new Map<string, number>();
+		// this.state.areas.forEach((area: any) => {
+		// 	areaCount.set(area.name, 0);
+		// });
+		// movedData.forEach((mv: Operation) => {
+		// 	areaCount.set(mv.area, areaCount.get(mv.area) ? areaCount.get(mv.area) + 1 : 1);
+		// });
+		const { areaCount } = this.state;
 		console.log(areaCount);
 		const barData :DepotsData[] = this.state.areas.map((area: any, i: number) => ({
 			position: [area.lon, area.lat, 0],

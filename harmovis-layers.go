@@ -20,6 +20,7 @@ import (
 	"github.com/mtfelian/golang-socketio/transport"
 	fleet "github.com/synerex/proto_fleet"
 	geo "github.com/synerex/proto_geography"
+	pcounter "github.com/synerex/proto_pcounter"
 	pagent "github.com/synerex/proto_people_agent"
 	api "github.com/synerex/synerex_api"
 	pbase "github.com/synerex/synerex_proto"
@@ -500,6 +501,37 @@ func subscribePFlowSupply(client *sxutil.SXServiceClient) {
 	}
 }
 
+func supplyPAreaCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
+	parea := &pcounter.ACounters{}
+	err := proto.Unmarshal(sp.Cdata.Entity, parea)
+	if err == nil {
+		jsondata, err := json.Marshal(*parea)
+		//		fmt.Println("rcb",mm.GetJson())
+		if err == nil {
+			mu.Lock()
+			ioserv.BroadcastToAll("parea", string(jsondata))
+			log.Printf("Bloadcast supplyPAreaCallback > %v\n", string(jsondata))
+			mu.Unlock()
+		} else {
+			log.Printf("Error in supplyPAreaCallback > json.Marshal\n")
+			log.Printf("%+v", err)
+		}
+	} else {
+		log.Printf("Error in supplyPAreaCallback > proto.Unmarshal\n")
+		log.Printf("%+v", err)
+	}
+}
+
+func subscribePAreaSupply(client *sxutil.SXServiceClient) {
+	for {
+		ctx := context.Background() //
+		err := client.SubscribeSupply(ctx, supplyPAreaCallback)
+		log.Printf("Error:Supply %s\n", err.Error())
+		// we need to restart
+		reconnectClient(client)
+	}
+}
+
 /*
 func supplyPTCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 //	pt := sp.GetArg_PTService()
@@ -569,6 +601,9 @@ func main() {
 	argJSON4 := fmt.Sprintf("{Client:Map:Pflow}")
 	pflow_client := sxutil.NewSXServiceClient(client, pbase.PEOPLE_FLOW_SVC, argJSON4)
 
+	argJSON5 := fmt.Sprintf("{Client:Map:Parea}")
+	parea_client := sxutil.NewSXServiceClient(client, pbase.AREA_COUNTER_SVC, argJSON5)
+
 	wg.Add(1)
 	go subscribeRideSupply(rideClient)
 
@@ -577,6 +612,8 @@ func main() {
 	go subscribeGeoSupply(geo_client)
 
 	go subscribePFlowSupply(pflow_client)
+
+	go subscribePAreaSupply(parea_client)
 
 	go monitorStatus() // keep status
 

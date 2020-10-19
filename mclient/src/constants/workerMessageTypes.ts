@@ -3,6 +3,7 @@ import { AgentData } from "./agent";
 import { BarData } from "./bargraph";
 import { Line } from "./line";
 import { Arc, Scatter , LabelInfo} from "./geoObjects";
+import { PAreaData } from "./parea";
 
 export interface WorkerMessage {
     type: SocketMsgTypes;
@@ -12,6 +13,9 @@ export interface SocketMessage<T> extends WorkerMessage  {
     payload: T
 }
 
+export const isPAreaMsg = (msg: WorkerMessage): msg is SocketMessage<PAreaData> => {
+    return msg.type === 'RECEIVED_PAREA'
+}
 export const isAreasMsg = (msg: WorkerMessage): msg is SocketMessage<string> => {
     return msg.type === 'RECEIVED_AREAS'
 }
@@ -84,4 +88,5 @@ export type SocketMsgTypes = 'RECEIVED_PFLOW'| 'RECEIVED_AGENT'| 'CONNECTED'| 'R
      | 'RECEIVED_CLEAR_SCATTERS'
      | 'RECEIVED_LABEL_INFO'
      | 'RECEIVED_HARMOVIS_CONF'
+     | 'RECEIVED_PAREA'
      ;
