@@ -718,7 +718,7 @@ class App extends Container<any,any> {
 		// 	areaCount.set(mv.area, areaCount.get(mv.area) ? areaCount.get(mv.area) + 1 : 1);
 		// });
 		const { areaCount } = this.state;
-		console.log(areaCount);
+		// console.log(areaCount);
 		const barData :DepotsData[] = this.state.areas.map((area: any, i: number) => ({
 			position: [area.lon, area.lat, 0],
 			radius: 1,
