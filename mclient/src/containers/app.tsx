@@ -129,7 +129,8 @@ class App extends Container<any,any> {
 				height: 500
 			}, */
 			linecolor: [0,155,155],
-			popup: [0, 0, '']
+			popup: [0, 0, ''],
+			areaCount: [],
 		}
 
 		// just initial settings for lines.
