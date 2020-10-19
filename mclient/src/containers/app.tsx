@@ -130,7 +130,7 @@ class App extends Container<any,any> {
 			}, */
 			linecolor: [0,155,155],
 			popup: [0, 0, ''],
-			areaCount: [],
+			areaCount: new Map<string, number>(),
 		}
 
 		// just initial settings for lines.
@@ -724,7 +724,7 @@ class App extends Container<any,any> {
 			radius: 1,
 			color: [0,0,0],
 			optColor: [[0,255,0]],
-			optElevation: [areaCount.get(area.name)],
+			optElevation: [areaCount.get(area.name) || 0],
 			settime,
 		}));
 
