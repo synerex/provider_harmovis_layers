@@ -13,6 +13,7 @@ export interface PFlowData {
 export interface Operation 
 {
     id?: number,
+    area?: string,
     longitude: number,
     latitude: number,
     z?: number,

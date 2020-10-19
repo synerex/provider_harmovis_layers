@@ -24,11 +24,17 @@ const getToken = () => {
 //    console.log('Get mapbox token')
 }
 
+const getAreas = () => {
+    socket.emit('get_areas', {})
+//    console.log('Get mapbox token')
+}
+
 
 socket.on('connect', () => {
     console.log('Socket.IO connected!')
     worker.postMessage({ type: 'CONNECTED'} as SocketMessage<void>);
     setTimeout(getToken, 500) // 500msec after send get=mapbox-token
+    setTimeout(getAreas, 750) // 750msec after send get=areas
 })
 
 socket.on('mapbox_token', (payload: string) => {
@@ -44,6 +50,13 @@ socket.on('mapbox_token', (payload: string) => {
     }
 })
 
+socket.on('areas', (payload: string) => {
+        console.log('areas Got:', payload)
+        worker.postMessage({
+            type: 'RECEIVED_AREAS',
+            payload
+        } as SocketMessage<string> );
+})
 
 //this.getPitch.bind(this))
 //socket.on('bearing', this.getBearing.bind(this))

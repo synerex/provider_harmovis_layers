@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +32,7 @@ var (
 	nodesrv         = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
 	assetDir        = flag.String("assetdir", "", "set Web client dir")
 	mapbox          = flag.String("mapbox", "", "Set Mapbox access token")
+	areasJson       = flag.String("areasJson", "", "Path to areas.json")
 	port            = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
 	mu              = new(sync.Mutex)
 	assetsDir       http.FileSystem
@@ -160,6 +162,17 @@ func run_server() *gosocketio.Server {
 		}
 		c.Emit("mapbox_token", mapboxToken)
 		log.Printf("mapbox-token transferred %s ", mapboxToken)
+	})
+
+	server.On("get_areas", func(c *gosocketio.Channel) {
+		log.Printf("Requested areas")
+		bytes, err := ioutil.ReadFile(*areasJson)
+		if err != nil {
+			panic(err)
+		}
+
+		c.Emit("areas", string(bytes))
+		log.Printf("areas transferred %s ", string(bytes))
 	})
 
 	server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {

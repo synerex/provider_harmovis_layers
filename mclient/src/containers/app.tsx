@@ -5,7 +5,7 @@ import * as actions from '../actions/actions'
 
 import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
-	LoadingIcon, FpsDisplay, Movesbase, Actions, LineMapLayer
+	LoadingIcon, FpsDisplay, Movesbase, Actions, LineMapLayer, DepotsLayer, DepotsData,
 } from 'harmoware-vis'
 
 // import './App.scss';
@@ -30,13 +30,13 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg, isAreasMsg
 	} from '../constants/workerMessageTypes'
 import  TopTextLayer  from '../components/TopTextLayer'
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
-import { PFlowData } from '../constants/pflow'
+import { PFlowData, Operation } from '../constants/pflow'
 //import layerSettings from '../reducer/layerSettings'
 
 class App extends Container<any,any> {
@@ -51,6 +51,11 @@ class App extends Container<any,any> {
 			const msg = e.data;
 			if (isPFlowMsg(msg)) {
 				self.getPflow(msg.payload)
+			} else if(isAreasMsg(msg)) {
+				this.setState({
+					areas: JSON.parse(msg.payload)
+				});
+				console.log("Areas:", JSON.parse(msg.payload))
 			} else if (isBarGraphMsg(msg)) {
 				self.getBargraph(msg.payload)
 			} else if (isAgentMsg(msg)) {
@@ -107,6 +112,7 @@ class App extends Container<any,any> {
 			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
+			areas: [],
 			
 //			geojson: null,
 //			lines: [],
@@ -321,8 +327,9 @@ class App extends Container<any,any> {
 	getPflow (data: PFlowData) {
 		console.log("Received PFlow:", data);
 		const { actions, movesbase } = this.props
-		const bars = data;
 		let  setMovesbase = [...movesbase]
+
+		data.operation.forEach(ope => ope.area = data.area);
 		
 		setMovesbase.push({
 			mtype: 0,
@@ -691,6 +698,24 @@ class App extends Container<any,any> {
 			meshVisible, mesh3D, meshWire, meshRadius, meshHeight, meshPolyNum, meshAngle,
 			mapVisible
 		} = props
+
+		const areaCount = new Map<string, number>();
+		this.state.areas.forEach((area: any) => {
+			areaCount.set(area.name, 0);
+		});
+		movedData.forEach((mv: Operation) => {
+			areaCount.set(mv.area, areaCount.get(mv.area) ? areaCount.get(mv.area) + 1 : 1);
+		});
+		console.log(areaCount);
+		const barData :DepotsData[] = this.state.areas.map((area: any, i: number) => ({
+			position: [area.lon, area.lat, 0],
+			radius: 1,
+			color: [0,0,0],
+			optColor: [[0,255,0]],
+			optElevation: [areaCount.get(area.name)],
+			settime,
+		}));
+
 		// 	const { movesFileName } = inputFileName;
 //		const optionVisible = false
 		const onHover = (el :any) => {
@@ -708,6 +733,18 @@ class App extends Container<any,any> {
 			}
 		}
 		let layers = []
+
+		if (areaCount.size > 0) {
+			layers.push(new DepotsLayer({
+				id: 'bar-graph-layer-s',
+				depotsData: barData,
+				iconChange: false,
+				getRadius: () => 0.1,
+				layerRadiusScale: 0.1,
+				layerOpacity: 0.1,
+				optionCentering: true,
+			}))
+		}
 
 		layers.push(new BarLayer({
 			id: 'bar-layer',

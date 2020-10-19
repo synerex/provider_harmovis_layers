@@ -12,6 +12,9 @@ export interface SocketMessage<T> extends WorkerMessage  {
     payload: T
 }
 
+export const isAreasMsg = (msg: WorkerMessage): msg is SocketMessage<string> => {
+    return msg.type === 'RECEIVED_AREAS'
+}
 export const isPFlowMsg = (msg: WorkerMessage): msg is SocketMessage<PFlowData> => {
     return msg.type === 'RECEIVED_PFLOW'
 }
@@ -67,6 +70,7 @@ export const isHarmoVISConfMsg = (msg: WorkerMessage): msg is SocketMessage<any>
 
 
 export type SocketMsgTypes = 'RECEIVED_PFLOW'| 'RECEIVED_AGENT'| 'CONNECTED'| 'RECEIVED_MAPBOX_TOKEN'
+     | 'RECEIVED_AREAS'
      | 'RECEIVED_BAR_GRAPHS'
      | 'RECEIVED_LINES'
      | 'RECEIVED_GEOJSON'
