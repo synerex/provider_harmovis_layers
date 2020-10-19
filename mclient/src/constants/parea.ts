@@ -1,6 +1,7 @@
 export interface PAreaData {
     intervalSec?: number,
     acs: ACounter[],
+    ts: Date,
 }
 
 export interface ACounter
