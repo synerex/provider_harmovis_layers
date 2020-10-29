@@ -422,6 +422,8 @@ func supplyPAgentCallback(clt *sxutil.SXServiceClient, sp *api.Supply) {
 
 			jsonBytes, err := json.Marshal(agents)
 			if err == nil {
+				seconds = agents.Ts.GetSeconds()
+				nanos = agents.Ts.GetNanos()
 				jstr := fmt.Sprintf("{ \"ts\": %d.%03d, \"dt\": %s}", seconds, int(nanos/1000000), string(jsonBytes))
 				log.Printf("Lines: %v", jstr)
 				mu.Lock()

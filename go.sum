@@ -49,6 +49,10 @@ github.com/mtfelian/golang-socketio v1.5.2 h1:XGR4ZdBvkdfHceTKE/PrDH3DEpPCpyjD/k
 github.com/mtfelian/golang-socketio v1.5.2/go.mod h1:ZRviig62J0W0M5/Qv0QpW4p2BkDhzhbeK+hi9Z6se6w=
 github.com/mtfelian/synced v1.0.0 h1:/D7ISn9Cq1EzZ/z316ySS9d0v1NaBSijVZBQeK261v8=
 github.com/mtfelian/synced v1.0.0/go.mod h1:9LrjNfrzokPgxRAEluvyoztApADeGGEwULm94BJxGkE=
+github.com/nagata-yoshiteru/proto_pcounter v0.0.10 h1:ffFibhFpzxKCikYHGHQ7daracnE7TpJnux8mZkKHodA=
+github.com/nagata-yoshiteru/proto_pcounter v0.0.10/go.mod h1:bFvJIMQdsR6FpgiOYvJRaN0t1kGvrsz8+m/91vgBpto=
+github.com/nagata-yoshiteru/proto_people_agent v0.0.2 h1:bUa9VeA+cudrKeGXquA3GpamUe1iD0+sRpK1xe/MECU=
+github.com/nagata-yoshiteru/proto_people_agent v0.0.2/go.mod h1:B89V73ydFtBJrrZxB8V8dqS4MgJf3zDOO/2Gt0zoqCk=
 github.com/nagata-yoshiteru/synerex_proto v0.1.10 h1:4gQrr76Bat0T6NT6LCJZe6vpbsuIDEE5NSuGcUbnsmk=
 github.com/nagata-yoshiteru/synerex_proto v0.1.10/go.mod h1:lUHzAQw4NAT6YAULnyoTD/MRf7UiV84wcY2m7szJ4Mg=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
@@ -103,6 +107,8 @@ github.com/synerex/proto_geography v0.5.1 h1:lgesLWpybY+KCtJi5Qr6Qbs3ppOUSay8XgH
 github.com/synerex/proto_geography v0.5.1/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
 github.com/synerex/proto_geography v0.5.2 h1:xU+3grnDhMVyTmnIVTtIao3+fcUCaHdOnU7Jn/3Lywc=
 github.com/synerex/proto_geography v0.5.2/go.mod h1:Inamj23t+Gu0wIwOvlUoMHCfF/07SjLBMvIcXJmRRS0=
+github.com/synerex/proto_pcounter v0.0.6 h1:tt/mWkKWivqBIl5PqgdtDn3FrJqeI+luEL5ZRdEKP7Q=
+github.com/synerex/proto_pcounter v0.0.6/go.mod h1:PN6vV7FFIPOLTMREfwcAh8y6qkU3lj3tro0Q1/nU8TA=
 github.com/synerex/proto_people_agent v0.0.1 h1:l4zdTmSt1hvD2gLL5Af0XGjAZJnk47+1CNZ+yp5grWE=
 github.com/synerex/proto_people_agent v0.0.1/go.mod h1:Vp5ZMm89p0LCtziu5mpNdfJA+NbeM3fXhOSoJPIfU+Y=
 github.com/synerex/synerex_api v0.2.1 h1:2OTBiOBUjCYtjO4KzTPq1szU4oJDCgKVovcG1a/4TTw=

@@ -24,3 +24,4 @@ require (
 
 replace github.com/synerex/synerex_proto v0.1.9 => github.com/nagata-yoshiteru/synerex_proto v0.1.10
 replace github.com/synerex/proto_pcounter v0.0.6 => github.com/nagata-yoshiteru/proto_pcounter v0.0.10
+replace github.com/synerex/proto_people_agent v0.0.1 => github.com/nagata-yoshiteru/proto_people_agent v0.0.2
