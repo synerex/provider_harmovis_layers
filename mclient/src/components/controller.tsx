@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DepotsInput,
+import { MovesInput, DepotsInput,
   AddMinutesButton, PlayButton, PauseButton, ReverseButton, ForwardButton,
   ElapsedTimeRange, ElapsedTimeValue, SpeedRange, SpeedValue, SimulationDateTime,
   NavigationButton, BasedProps, ClickedObject, RoutePaths } from 'harmoware-vis'
@@ -157,6 +157,15 @@ export default class Controller extends React.Component<ControllerProps, ContSta
     }
   }
 
+  movesBaseSave(){
+    const resultJson = JSON.stringify(this.props.movesbase);
+    const downLoadLink = document.createElement("a");
+    downLoadLink.download = 'movesbase-' + Date.now() + '.json';
+    downLoadLink.href = URL.createObjectURL(new Blob([resultJson], {type: "text.plain"}));
+    downLoadLink.dataset.downloadurl = ["text/plain", downLoadLink.download, downLoadLink.href].join(":");
+    downLoadLink.click();
+  }
+  
   render () {
     const { settime, timeBegin, leading, timeLength, actions,
       secperhour, animatePause, animateReverse,
@@ -165,7 +174,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
 
     const { currentGroupindex, routeGroupDisplay, saveRouteGroup } = this.state
     const displayIndex = saveRouteGroup.length ? currentGroupindex + 1 : 0
-    const { depotsFileName } = inputFileName
+    const { depotsFileName, movesFileName } = inputFileName
 
     return (
       <div className='harmovis_controller'>
@@ -181,6 +190,21 @@ export default class Controller extends React.Component<ControllerProps, ContSta
               <div className='form-check'>
                 <input type='checkbox' id='MoveOptionChecked' onChange={getMoveOptionChecked} className='form-check-input' />
                 <label htmlFor='MoveOptionChecked' className='form-check-label'>移動データオプション表示</label>
+              </div>
+            </li>
+            <li><span>移動データセーブ</span>
+              <div className='btn-group d-flex' role='group'>
+                <button className='btn btn-outline-light btn-sm w-100' onClick={this.movesBaseSave.bind(this)}>
+                  <span className='button_span'>Data Save</span>
+                </button>
+              </div>
+            </li>
+            <li><span>移動データロード</span>
+              <div className='harmovis_input_button_column'>
+                <label htmlFor="MovesInput" className="btn btn-outline-light btn-sm w-100">
+                  移動データ選択<MovesInput actions={actions} id="MovesInput" />
+                </label>
+                <div>{movesFileName || '選択されていません'}</div>
               </div>
             </li>
             {/*

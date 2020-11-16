@@ -58,7 +58,7 @@ div.harmovis_controller {
     display: flex;
     flex-direction: column;
     label {
-      @extend .harmovis_button;
+      // @extend .harmovis_button;
       input[type="file"] {
         display: none;
       }

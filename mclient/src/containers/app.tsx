@@ -12,7 +12,7 @@ import {
 // import { StaticMap,  } from 'react-map-gl';
 //import { Layer } from '@deck.gl/core'
 
-import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from '@deck.gl/layers'
+import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from 'deck.gl'
 
 import BarLayer from './BarLayer'
 import MeshLayer from './MeshLayer'
