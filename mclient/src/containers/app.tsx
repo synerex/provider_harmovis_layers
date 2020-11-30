@@ -72,7 +72,6 @@ class App extends Container<any,any> {
 				} as Depotsbase));
 				this.props.actions.setDepotsBase(depotsBase);
 				this.setState({ areas });
-				
 				console.log("Areas:", areas);
 			} else if (isBarGraphMsg(msg)) {
 				self.getBargraph(msg.payload)
@@ -409,6 +408,11 @@ class App extends Container<any,any> {
 			}
 		}
 		return i >= 0 && i < currentArea.counts.length ? currentArea.counts[i].count : 0;
+	}
+
+	setDepotsbaseAndAreas (areas: Area[], depotsBase: Depotsbase[], timeBegin: number, timeLength: number) {
+		this.props.actions.setDepotsBase(depotsBase);
+		this.setState({ areas });
 	}
 
 	getGeoJson (data :string) {
@@ -1023,6 +1027,8 @@ class App extends Container<any,any> {
 				getMoveOptionChecked={this.getMoveOptionChecked.bind(this)}
 				getDepotOptionChecked={this.getDepotOptionChecked.bind(this)}
 				getOptionChangeChecked={this.getOptionChangeChecked.bind(this)}
+				areas={areas}
+				setDepotsbaseAndAreas={this.setDepotsbaseAndAreas.bind(this)}
 				/>
 				:<div />
 			)

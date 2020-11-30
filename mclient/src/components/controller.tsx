@@ -2,7 +2,7 @@ import * as React from 'react'
 import { MovesInput, DepotsInput,
   AddMinutesButton, PlayButton, PauseButton, ReverseButton, ForwardButton,
   ElapsedTimeRange, ElapsedTimeValue, SpeedRange, SpeedValue, SimulationDateTime,
-  NavigationButton, BasedProps, ClickedObject, RoutePaths } from 'harmoware-vis'
+  NavigationButton, BasedProps, ClickedObject, RoutePaths, Depotsbase } from 'harmoware-vis'
 import { Icon } from 'react-icons-kit'
 import { ic_delete_forever as icDeleteForever, ic_save as icSave,
   ic_layers as icLayers, ic_delete as icDelete } from 'react-icons-kit/md'
@@ -20,6 +20,7 @@ import MapLayerController from './MapLayerController'
 import * as actions from '../actions/actions'
 import store from '../store'
 
+import { Area } from '../constants/parea'
 
 //import { HeatmapState } from '../reducer/heatmapSettings'
 
@@ -59,7 +60,10 @@ interface ControllerProps {
   getOptionChangeChecked: any, 
   inputFileName: any, 
   viewport: any ,
-  movesbase: any
+  movesbase: any,
+  areas: Area[],
+  depotsBase: Depotsbase[],
+  setDepotsbaseAndAreas: any,
 }
 
 interface ContState {
@@ -68,8 +72,8 @@ interface ContState {
   saveRouteGroup: {
     clickedObject: ClickedObject[],
     routePaths: RoutePaths[],
-  }[]
-
+  }[],
+  depotsBaseAndAreasName: string,
 }
 
 export default class Controller extends React.Component<ControllerProps, ContState> {
@@ -79,6 +83,7 @@ export default class Controller extends React.Component<ControllerProps, ContSta
         currentGroupindex: 0,
        routeGroupDisplay: false,
        saveRouteGroup: [],
+       depotsBaseAndAreasName: null,
       }
   }
 
@@ -166,13 +171,71 @@ export default class Controller extends React.Component<ControllerProps, ContSta
     downLoadLink.click();
   }
   
+  depotsBaseAndAreasSave(){
+    const { areas, depotsBase } = this.props;
+    const resultJson = JSON.stringify({ areas, depotsbase: depotsBase });
+    const downLoadLink = document.createElement("a");
+    downLoadLink.download = 'depotsbase-areas-' + Date.now() + '.json';
+    downLoadLink.href = URL.createObjectURL(new Blob([resultJson], {type: "text.plain"}));
+    downLoadLink.dataset.downloadurl = ["text/plain", downLoadLink.download, downLoadLink.href].join(":");
+    downLoadLink.click();
+  }
+
+  loadDepotsbaseAndAreas() {
+    const { setDepotsbaseAndAreas } = this.props;
+    let { timeBegin, timeLength } = this.props;
+    const { setState } = this;
+
+		const showOpenFileDialog = () => {
+			return new Promise(resolve => {
+				const input = document.createElement('input');
+				input.type = 'file';
+				input.accept = '.json, application/json';
+				input.onchange = (event: any) => { resolve(event.target.files[0]); };
+				input.click();
+			});
+		};
+		
+		const readAsText = (file: File) => {
+			return new Promise(resolve => {
+				const reader = new FileReader();
+				reader.readAsText(file);
+				reader.onload = () => { resolve(reader.result); };
+			});
+		};
+		
+		(async () => {
+			const file = await showOpenFileDialog() as File;
+      const content: string = await readAsText(file) as string;
+      const depotsBaseAndAreasName = file.name;
+			// 内容表示
+			console.log("import", content);
+			const { areas, depotsbase } = JSON.parse(content);
+      let minTime = areas[0].counts[0].time;
+      let maxTime = areas[0].counts[areas[0].counts.length - 1].time;
+      areas.forEach((area: Area) => {
+        if (area.counts[0].time < minTime) minTime = area.counts[0].time;
+        if (area.counts[area.counts.length - 1].time > maxTime) maxTime = area.counts[area.counts.length - 1].time;
+      });
+      if (minTime < timeBegin) {
+        timeLength = timeLength - minTime + timeBegin;
+        timeBegin = minTime;
+      }
+      if (maxTime > timeBegin + timeLength) {
+        timeLength = maxTime - timeBegin;
+      }
+      setDepotsbaseAndAreas(areas, depotsbase, timeBegin, timeLength);
+      setState({ depotsBaseAndAreasName });
+		})();
+  }
+  
   render () {
     const { settime, timeBegin, leading, timeLength, actions,
       secperhour, animatePause, animateReverse,
       getMoveDataChecked, getMoveOptionChecked, getDepotOptionChecked,
       getOptionChangeChecked, inputFileName, viewport } = this.props
 
-    const { currentGroupindex, routeGroupDisplay, saveRouteGroup } = this.state
+    const { currentGroupindex, routeGroupDisplay, saveRouteGroup, depotsBaseAndAreasName } = this.state
     const displayIndex = saveRouteGroup.length ? currentGroupindex + 1 : 0
     const { depotsFileName, movesFileName } = inputFileName
 
@@ -205,6 +268,21 @@ export default class Controller extends React.Component<ControllerProps, ContSta
                   移動データ選択<MovesInput actions={actions} id="MovesInput" />
                 </label>
                 <div>{movesFileName || '選択されていません'}</div>
+              </div>
+            </li>
+            <li><span>滞留データセーブ</span>
+              <div className='btn-group d-flex' role='group'>
+                <button className='btn btn-outline-light btn-sm w-100' onClick={this.depotsBaseAndAreasSave.bind(this)}>
+                  <span className='button_span'>Data Save</span>
+                </button>
+              </div>
+            </li>
+            <li><span>滞留データロード</span>
+              <div className='harmovis_input_button_column'>
+                <button className='btn btn-outline-light btn-sm w-100' onClick={this.loadDepotsbaseAndAreas.bind(this)}>
+                  <span className='button_span'>Data Load</span>
+                </button>
+                <div>{depotsBaseAndAreasName || '選択されていません'}</div>
               </div>
             </li>
             {/*
