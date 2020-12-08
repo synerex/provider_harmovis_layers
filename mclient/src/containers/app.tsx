@@ -411,8 +411,12 @@ class App extends Container<any,any> {
 	}
 
 	setDepotsbaseAndAreas (areas: Area[], depotsBase: Depotsbase[], timeBegin: number, timeLength: number) {
+		console.log(this.props.timeBegin, this.props.timeLength);
 		this.props.actions.setDepotsBase(depotsBase);
+		this.props.actions.setTimeBegin(timeBegin);
+		this.props.actions.setTimeLength(timeLength);
 		this.setState({ areas });
+		console.log(this.props.timeBegin, this.props.timeLength);
 	}
 
 	getGeoJson (data :string) {
@@ -828,7 +832,7 @@ class App extends Container<any,any> {
 
 		if (areas.length > 0) {
 			layers.push(new DepotsLayer({
-				id: 'bar-graph-layer-areas',
+				// id: 'bar-graph-layer-areas',
 				depotsData,
 				iconChange: false,
 				getRadius: () => 0.1,
@@ -973,7 +977,7 @@ class App extends Container<any,any> {
 					movedData,
 					clickedObject, 
 					actions,
-					visible: this.state.moveDataVisible,
+					// visible: this.state.moveDataVisible,
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.03,
 					layerOpacity: 0.8,
@@ -985,7 +989,7 @@ class App extends Container<any,any> {
 					sizeScale: 20,
 					iconChange: false,
 					optionChange: false, // this.state.optionChange,
-					onHover
+					// onHover
 				}) as any
 			)
 		}
