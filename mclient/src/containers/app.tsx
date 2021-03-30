@@ -364,6 +364,7 @@ class App extends Container<any,any> {
 
 	getPArea (data: PAreaData) {
 		const { areas } = this.state;
+		let { timeBegin, timeLength } = this.props;
 		console.log("Received PArea:", data);
 		// const areaCount = new Map<string, number>();
 		data.acs.forEach(v => {
@@ -378,6 +379,22 @@ class App extends Container<any,any> {
 			// areaCount.set(v.areaName, v.count)
 		});
 		// this.setState({ areaCount });
+
+		let minTime = areas[0].counts[0].time;
+		let maxTime = areas[0].counts[areas[0].counts.length - 1].time;		  
+		areas.forEach((area: any) => {
+			if (area.counts[0].time < minTime) minTime = area.counts[0].time;
+			if (area.counts[area.counts.length - 1].time > maxTime) maxTime = area.counts[area.counts.length - 1].time;
+		})
+		if (minTime < timeBegin) {
+			timeLength = timeLength - minTime + timeBegin;
+			timeBegin = minTime;
+			}
+		if (maxTime > timeBegin + timeLength) {
+			timeLength = maxTime - timeBegin;
+		}
+		this.props.actions.setTimeBegin(timeBegin);
+		this.props.actions.setTimeLength(timeLength);
 	}
 
 	getDepotsOptionFunc (props: any, index: number) {
