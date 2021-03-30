@@ -48,6 +48,7 @@ class App extends Container<any,any> {
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
 		const worker = new Worker('socketWorker.js'); // worker for socket-io communication.
 		const self = this;
+		this.getPArea = this.getPArea.bind(this);
 		worker.onmessage = (e) => {
 			const msg = e.data;
 			if (isPAreaMsg(msg)) {
