@@ -626,6 +626,8 @@ func main() {
 
 	go monitorStatus() // keep status
 
+	go ioserv.Serve()
+
 	serveMux := http.NewServeMux()
 
 	serveMux.Handle("/socket.io/", ioserv)
