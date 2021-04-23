@@ -1,5 +1,5 @@
-import { LayerProps, CompositeLayer,  ScatterplotLayer } from 'deck.gl'
-import {ColumnLayer, TextLayer} from '@deck.gl/layers';
+import { LayerProps, CompositeLayer,   } from '@deck.gl/core';
+import { ScatterplotLayer, ColumnLayer, TextLayer } from '@deck.gl/layers';
 import { MovedData, Movesbase } from 'harmoware-vis'
 import { Layer } from '@deck.gl/core';
 import { BarData } from '../constants/bargraph';

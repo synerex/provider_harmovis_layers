@@ -1,4 +1,4 @@
-import { LayerProps, CompositeLayer} from 'deck.gl'
+import { LayerProps, CompositeLayer} from '@deck.gl/core'
 import { IconLayer, TextLayer } from '@deck.gl/layers'
 import { Layer } from '@deck.gl/core';
 import { BalloonInfo } from '../../constants/informationBalloon';
