@@ -1,4 +1,5 @@
-import { LayerProps, CompositeLayer, HexagonLayer, GridLayer } from 'deck.gl'
+import { LayerProps, CompositeLayer } from '@deck.gl/core'
+import { HexagonLayer, GridLayer } from '@deck.gl/aggregation-layers'
 import { MovedData } from 'harmoware-vis'
 import { GridType } from '../constants/MapSettings'
 
