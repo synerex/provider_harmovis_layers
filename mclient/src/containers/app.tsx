@@ -5,14 +5,14 @@ import * as actions from '../actions/actions'
 
 import {
 	Container, connectToHarmowareVis, HarmoVisLayers, MovesLayer, MovesInput,
-	LoadingIcon, FpsDisplay, Movesbase, Actions, LineMapLayer
+	LoadingIcon, FpsDisplay, Movesbase, Actions, LineMapLayer, DepotsLayer, DepotsData, Depotsbase,
 } from 'harmoware-vis'
 
 // import './App.scss';
 // import { StaticMap,  } from 'react-map-gl';
 //import { Layer } from '@deck.gl/core'
 
-import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from '@deck.gl/layers'
+import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from 'deck.gl'
 
 import BarLayer from './BarLayer'
 import MeshLayer from './MeshLayer'
@@ -30,12 +30,14 @@ import { BalloonInfo, BalloonItem } from '../constants/informationBalloon'
 import { AgentData } from '../constants/agent'
 import { isMapboxToken, isBarGraphMsg, isAgentMsg, isLineMsg, isGeoJsonMsg,
 		isPitchMsg, isBearingMsg, isClearMovesMsg, isViewStateMsg, isArcMsg,
-		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg
+		isClearArcMsg, isScatterMsg, isClearScatterMsg, isLabelInfoMsg, isHarmoVISConfMsg, isPFlowMsg, isAreasMsg, isPAreaMsg
 	} from '../constants/workerMessageTypes'
 import  TopTextLayer  from '../components/TopTextLayer'
 
 import Controller from '../components/controller'
 import HeatmapLayer from './HeatmapLayer'
+import { PFlowData, Operation } from '../constants/pflow'
+import { PAreaData, Area } from '../constants/parea'
 //import layerSettings from '../reducer/layerSettings'
 
 class App extends Container<any,any> {
@@ -46,9 +48,33 @@ class App extends Container<any,any> {
 		const { setSecPerHour, setLeading, setTrailing } = props.actions
 		const worker = new Worker('socketWorker.js'); // worker for socket-io communication.
 		const self = this;
+		this.getPArea = this.getPArea.bind(this);
 		worker.onmessage = (e) => {
 			const msg = e.data;
-			if (isBarGraphMsg(msg)) {
+			if (isPAreaMsg(msg)) {
+				self.getPArea(msg.payload)
+			} else if(isPFlowMsg(msg)) {
+				self.getPflow(msg.payload)
+			} else if(isAreasMsg(msg)) {
+				const areas = JSON.parse(msg.payload) as Area[];
+				const nowDateTime = Math.floor(new Date().getTime()/1000.0) - 30
+				areas.forEach(area => {
+					area.counts = [
+						{
+							time: nowDateTime,
+							count: 0,
+						}
+					]
+				})
+				const depotsBase = areas.map(area => ({
+					latitude: area.lat,
+					longitude: area.lon,
+					type: "PArea",
+				} as Depotsbase));
+				this.props.actions.setDepotsBase(depotsBase);
+				this.setState({ areas });
+				console.log("Areas:", areas);
+			} else if (isBarGraphMsg(msg)) {
 				self.getBargraph(msg.payload)
 			} else if (isAgentMsg(msg)) {
 				self.getAgents(msg.payload)
@@ -104,6 +130,8 @@ class App extends Container<any,any> {
 			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
+			areas: [],
+			areaDepotsLayer: null,
 			
 //			geojson: null,
 //			lines: [],
@@ -117,12 +145,13 @@ class App extends Container<any,any> {
 				height: 500
 			}, */
 			linecolor: [0,155,155],
-			popup: [0, 0, '']
+			popup: [0, 0, ''],
+			areaCount: new Map<string, number>(),
 		}
 
 		// just initial settings for lines.
 
-
+		this.props.actions.setDepotsOptionFunc(this.getDepotsOptionFunc.bind(this));
 //		this._onViewStateChange = this._onViewStateChange.bind(this)
 	}
 
@@ -314,6 +343,99 @@ class App extends Container<any,any> {
 	bin2String (array :any) {
 		return String.fromCharCode.apply(String, array)
   	}
+
+	getPflow (data: PFlowData) {
+		console.log("Received PFlow:", data);
+		const { actions, movesbase } = this.props
+		let  setMovesbase = [...movesbase]
+
+		data.operation.forEach(ope => ope.area = data.area);
+		
+		setMovesbase.push({
+			mtype: 0,
+			type: data.type,
+			id: data.id,
+			departuretime: data.start_time.second,
+			arrivaltime: data.end_time.second,
+			operation: data.operation,
+		} as Movesbase)
+
+		actions.updateMovesBase(setMovesbase);
+	}
+
+	getPArea (data: PAreaData) {
+		const { areas } = this.state;
+		let { timeBegin, timeLength } = this.props;
+		console.log("Received PArea:", data);
+		// const areaCount = new Map<string, number>();
+		data.acs.forEach(v => {
+			areas.forEach((area: Area) => {
+				if (area.name === v.areaName) {
+					area.counts.push({
+						time: v.ts.seconds + v.ts.nanos / 1000000000,
+						count: v.count,
+					})
+				}
+			})
+			// areaCount.set(v.areaName, v.count)
+		});
+		// this.setState({ areaCount });
+
+		let minTime = areas[0].counts[0].time;
+		let maxTime = areas[0].counts[areas[0].counts.length - 1].time;		  
+		areas.forEach((area: any) => {
+			if (area.counts[0].time < minTime) minTime = area.counts[0].time;
+			if (area.counts[area.counts.length - 1].time > maxTime) maxTime = area.counts[area.counts.length - 1].time;
+		})
+		if (minTime < timeBegin) {
+			timeLength = timeLength - minTime + timeBegin;
+			timeBegin = minTime;
+			}
+		if (maxTime > timeBegin + timeLength) {
+			timeLength = maxTime - timeBegin;
+		}
+		this.props.actions.setTimeBegin(timeBegin);
+		this.props.actions.setTimeLength(timeLength);
+	}
+
+	getDepotsOptionFunc (props: any, index: number) {
+		const { settime, depotsBase } = props;
+		const currentData = depotsBase[index];
+		// console.log(currentData);
+		if (currentData.type === "PArea") {
+			const optElevation = [
+				this.getCurrentAreaCount(settime, index),
+			];
+			const optColor = [[0,0,255]];
+			return { optElevation, optColor };
+		} else {
+			return null;
+		}
+	}
+
+	getCurrentAreaCount (time: number, index: number) {
+		// console.log(time, index);
+		const areas: Area[] = this.state.areas;
+		const currentArea = areas[index];
+		if (!currentArea) return 0;
+		let i = 0;
+		for (; i < currentArea.counts.length; i++) {
+			if (currentArea.counts[i].time > time) {
+				i--;
+				break;
+			}
+		}
+		return i >= 0 && i < currentArea.counts.length ? currentArea.counts[i].count : 0;
+	}
+
+	setDepotsbaseAndAreas (areas: Area[], depotsBase: Depotsbase[], timeBegin: number, timeLength: number) {
+		console.log(this.props.timeBegin, this.props.timeLength);
+		this.props.actions.setDepotsBase(depotsBase);
+		this.props.actions.setTimeBegin(timeBegin);
+		this.props.actions.setTimeLength(timeLength);
+		this.setState({ areas });
+		console.log(this.props.timeBegin, this.props.timeLength);
+	}
 
 	getGeoJson (data :string) {
 		console.log('Geojson:' + data.length)
@@ -662,7 +784,7 @@ class App extends Container<any,any> {
 
 	render () {
 		const props = this.props
-		const { actions, clickedObject, inputFileName, viewport, deoptsData, loading, lines, arcs, scatters, geojson,
+		const { actions, clickedObject, inputFileName, viewport, depotsData, loading, lines, arcs, scatters, geojson,
 			arcVisible, scatterVisible, scatterFill, scatterMode, 
 			routePaths, lightSettings, movesbase, movedData, mapStyle ,extruded, gridSize,gridHeight, enabledHeatmap, selectedType,
 			widthRatio, heightRatio, radiusRatio, showTitle, infoBalloonList,  settime, titlePosOffset, titleSize,
@@ -670,6 +792,32 @@ class App extends Container<any,any> {
 			meshVisible, mesh3D, meshWire, meshRadius, meshHeight, meshPolyNum, meshAngle,
 			mapVisible
 		} = props
+		const { areas /*areaCount*/ } = this.state;
+
+		// const areaCount = new Map<string, number>();
+		// this.state.areas.forEach((area: any) => {
+		// 	areaCount.set(area.name, 0);
+		// });
+		// movedData.forEach((mv: Operation) => {
+		// 	areaCount.set(mv.area, areaCount.get(mv.area) ? areaCount.get(mv.area) + 1 : 1);
+		// });
+		// console.log(areaCount);
+		// const oldBarData :DepotsData[] = areas.map((area: Area) => ({
+		// 	position: [area.lon, area.lat, 0],
+		// 	radius: 1,
+		// 	color: [0,0,0],
+		// 	optColor: [[0,255,0]],
+		// 	optElevation: [areaCount.get(area.name) || 0],
+		// 	settime,
+		// }));
+		// const barData :DepotsData[] = areas.map((area: Area) => ({
+		// 	position: [area.lon, area.lat, 0],
+		// 	radius: 1,
+		// 	color: [0,0,0],
+		// 	optColor: [[0,0,255]],
+		// 	settime,
+		// }));
+
 		// 	const { movesFileName } = inputFileName;
 //		const optionVisible = false
 		const onHover = (el :any) => {
@@ -687,6 +835,30 @@ class App extends Container<any,any> {
 			}
 		}
 		let layers = []
+
+		// if (areaCount.size > 0) {
+		// 	layers.push(new DepotsLayer({
+		// 		id: 'bar-graph-layer-s',
+		// 		depotsData: oldBarData,
+		// 		iconChange: false,
+		// 		getRadius: () => 0.1,
+		// 		layerRadiusScale: 0.1,
+		// 		layerOpacity: 0.1,
+		// 		optionCentering: true,
+		// 	}))
+		// }
+
+		if (areas.length > 0) {
+			layers.push(new DepotsLayer({
+				// id: 'bar-graph-layer-areas',
+				depotsData,
+				iconChange: false,
+				getRadius: () => 0.1,
+				layerRadiusScale: 0.1,
+				layerOpacity: 0.1,
+				optionCentering: true,
+			}))
+		}
 
 		layers.push(new BarLayer({
 			id: 'bar-layer',
@@ -823,7 +995,7 @@ class App extends Container<any,any> {
 					movedData,
 					clickedObject, 
 					actions,
-					visible: this.state.moveDataVisible,
+					// visible: this.state.moveDataVisible,
 					optionVisible: this.state.moveOptionVisible,
 					layerRadiusScale: 0.03,
 					layerOpacity: 0.8,
@@ -835,7 +1007,7 @@ class App extends Container<any,any> {
 					sizeScale: 20,
 					iconChange: false,
 					optionChange: false, // this.state.optionChange,
-					onHover
+					// onHover
 				}) as any
 			)
 		}
@@ -877,6 +1049,8 @@ class App extends Container<any,any> {
 				getMoveOptionChecked={this.getMoveOptionChecked.bind(this)}
 				getDepotOptionChecked={this.getDepotOptionChecked.bind(this)}
 				getOptionChangeChecked={this.getOptionChangeChecked.bind(this)}
+				areas={areas}
+				setDepotsbaseAndAreas={this.setDepotsbaseAndAreas.bind(this)}
 				/>
 				:<div />
 			)

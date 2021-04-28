@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
 import xss from 'xss';
 
+import { PAreaData } from '../constants/parea';
+import { PFlowData } from '../constants/pflow';
 import { BarData } from '../constants/bargraph';
 import { AgentData } from '../constants/agent';
 import { Line } from '../constants/line';
@@ -23,11 +25,17 @@ const getToken = () => {
 //    console.log('Get mapbox token')
 }
 
+const getAreas = () => {
+    socket.emit('get_areas', {})
+//    console.log('Get mapbox token')
+}
+
 
 socket.on('connect', () => {
     console.log('Socket.IO connected!')
     worker.postMessage({ type: 'CONNECTED'} as SocketMessage<void>);
     setTimeout(getToken, 500) // 500msec after send get=mapbox-token
+    setTimeout(getAreas, 750) // 750msec after send get=areas
 })
 
 socket.on('mapbox_token', (payload: string) => {
@@ -43,6 +51,13 @@ socket.on('mapbox_token', (payload: string) => {
     }
 })
 
+socket.on('areas', (payload: string) => {
+        console.log('areas Got:', payload)
+        worker.postMessage({
+            type: 'RECEIVED_AREAS',
+            payload
+        } as SocketMessage<string> );
+})
 
 //this.getPitch.bind(this))
 //socket.on('bearing', this.getBearing.bind(this))
@@ -126,6 +141,24 @@ function color2array(col:number) : number[] {
 
 
 function startRecivedData() {
+
+    socket.on('parea', (str: string) => {
+        const payload: PAreaData = JSON.parse(str);
+//        console.log('Agents:' + str.length)
+        worker.postMessage({
+            type: 'RECEIVED_PAREA',
+            payload
+        } as SocketMessage<PAreaData>)
+    })
+
+    socket.on('pflow', (str: string) => {
+        const payload: PFlowData = JSON.parse(str);
+//        console.log('Agents:' + str.length)
+        worker.postMessage({
+            type: 'RECEIVED_PFLOW',
+            payload
+        } as SocketMessage<PFlowData>)
+    })
 
     socket.on('bargraphs', (str: string) => {
         console.log('Bargraphs:' + str.length)

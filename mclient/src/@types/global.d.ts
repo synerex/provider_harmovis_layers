@@ -52,8 +52,13 @@ declare module "deck.gl" {
   class GridLayer<P extends HexagonLayerProps, S = {}> extends Layer<P, S> {}
 
   class ArcLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
+  class ColumnLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
+  class IconLayer<P extends LayerProps = LayerProps, S = {}> extends Layer<P, S> {}
 
   class PolygonLayer<P extends LayerProps = LayerProps, S = {}> extends CompositeLayer<P, S> {}
+
+  class GeoJsonLayer<P extends LayerProps = LayerProps, S = {}> extends CompositeLayer<P, S> {}
+  class TextLayer<P extends LayerProps = LayerProps, S = {}> extends CompositeLayer<P, S> {}
 
   class AttributeManager {
     addInstanced(attributes: object, updaters?: object): void;
@@ -82,4 +87,14 @@ declare module "@deck.gl/core" {
       changeFlags: any,
     }): void;
   }
+}
+
+declare module "@luma.gl/engine" {
+  class CubeGeometry{
+    constructor(props: any);
+  }
+}
+
+declare module "@loaders.gl/obj" {
+  const OBJLoader:any
 }
