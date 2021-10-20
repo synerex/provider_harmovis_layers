@@ -30,7 +30,7 @@ var (
 	nodesrv         = flag.String("nodesrv", "127.0.0.1:9990", "Node ID Server")
 	assetDir        = flag.String("assetdir", "", "set Web client dir")
 	mapbox          = flag.String("mapbox", "", "Set Mapbox access token")
-	port            = flag.Int("port", 10080, "HarmoVis Ext Provider Listening Port")
+	port            = flag.Int("port", 3030, "HarmoVis Ext Provider Listening Port")
 	mu              = new(sync.Mutex)
 	assetsDir       http.FileSystem
 	ioserv          *gosocketio.Server
