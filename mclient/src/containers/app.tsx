@@ -12,7 +12,7 @@ import {
 // import { StaticMap,  } from 'react-map-gl';
 //import { Layer } from '@deck.gl/core'
 
-import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer} from '@deck.gl/layers'
+import {GeoJsonLayer, LineLayer, ArcLayer, ScatterplotLayer, PolygonLayer} from '@deck.gl/layers'
 
 import BarLayer from './BarLayer'
 import MeshLayer from './MeshLayer'
@@ -104,6 +104,7 @@ class App extends Container<any,any> {
 			fpsVisible:true,
 			optionChange: false,
 			mapbox_token: '',
+			polygonData: [],
 			
 //			geojson: null,
 //			lines: [],
@@ -255,6 +256,9 @@ class App extends Container<any,any> {
 		if (conf.addMesh != undefined) {
 			this.addMeshData(conf.addMesh)
 		}
+		if (conf.addPoly != undefined) {
+			this.addPolygonData(conf.addPoly)
+		}
 		if (conf.meshVisible != undefined) {
 			store.dispatch(actions.setMeshVisible(conf.meshVisible))
 		}
@@ -309,7 +313,10 @@ class App extends Container<any,any> {
 		}
 		actions.updateMovesBase(setMovesbase);	
 	}
-	
+
+	addPolygonData(polygonBlock:any){
+		this.setState({polygonData:polygonBlock});
+	}
 
 	bin2String (array :any) {
 		return String.fromCharCode.apply(String, array)
@@ -852,6 +859,24 @@ class App extends Container<any,any> {
 					height: gridHeight
 				  })
 			)
+		}
+
+		if(this.state.polygonData.length > 0){
+			layers.push(
+				new PolygonLayer({
+					id: 'PolygonLayer',
+					data: this.state.polygonData,
+					visible: true,
+					opacity: 0.8,
+					pickable: true,
+					extruded: true,
+					wireframe: true,
+					getPolygon: (x: any) => x.polygon,
+					getLineColor: (x: any) => x.linecolor,
+					getFillColor: (x: any) => x.fillcolor,
+					getElevation: (x: any) => x.elevation
+				})
+			);
 		}
 
 //		const onViewportChange = this.props.onViewportChange || actions.setViewport
